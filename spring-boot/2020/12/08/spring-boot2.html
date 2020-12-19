@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>여러 Spring Boot 서버 H2 접속 설정</title>
+  <meta name="description" content="여러 Spring Boot 서버에서 H2 서버에 접속해야 할 경우 다음과 같이 설정한다.우선 하나의 서버에서 다음과 같은 @Configuration 설정을 추가하며 해당 서버를 A서버라고 지칭하겠다.@Configurationpublic class H2Config {    @Bean...">
+  
+  <meta name="author" content="주니어 개발자">
+  <meta name="copyright" content="&copy; 주니어 개발자 2020">
+  
+
+  <!-- External libraries -->
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.4.1/styles/monokai-sublime.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/lightbox2/2.7.1/css/lightbox.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <!-- Favicon and other icons (made with http://www.favicon-generator.org/) -->
+  <link rel="shortcut icon" href="/assets/icons/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/assets/icons/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/icons/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/assets/icons/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/assets/icons/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/assets/icons/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/assets/icons/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/assets/icons/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/assets/icons/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/assets/icons/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="/assets/icons/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/icons/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+  <link rel="manifest" href="/assets/icons/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/assets/icons/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+
+  
+  <!-- Facebook OGP cards -->
+  <meta property="og:description" content="여러 Spring Boot 서버에서 H2 서버에 접속해야 할 경우 다음과 같이 설정한다.우선 하나의 서버에서 다음과 같은 @Configuration 설정을 추가하며 해당 서버를 A서버라고 지칭하겠다.@Configurationpublic class H2Config {    @Bean..." />
+  <meta property="og:url" content="https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot2.html">
+  <meta property="og:site_name" content="주니어 개발자 블로그" />
+  <meta property="og:title" content="여러 Spring Boot 서버 H2 접속 설정" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://jr-developers.github.io/assets/logo.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="612" />
+  <meta property="og:image:height" content="605" />
+  
+
+  
+  <!-- Twitter: card tags -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="여러 Spring Boot 서버 H2 접속 설정">
+  <meta name="twitter:description" content="여러 Spring Boot 서버에서 H2 서버에 접속해야 할 경우 다음과 같이 설정한다.우선 하나의 서버에서 다음과 같은 @Configuration 설정을 추가하며 해당 서버를 A서버라고 지칭하겠다.@Configurationpublic class H2Config {    @Bean...">
+  <meta name="twitter:image" content="https://jr-developers.github.io/assets/logo.png">
+  <meta name="twitter:url" content="https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot2.html">
+  
+
+  
+
+  <!-- Site styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot2.html">
+	<link rel="alternate" type="application/rss+xml" title="주니어 개발자 블로그" href="https://jr-developers.github.io/feed.xml" />
+
+	<meta name="google-site-verification" content="Taa5vT48o67ok6s5-GcjwD8baYRy1FzqTZQ2-Hz_zkY" />
+	<meta name="naver-site-verification" content="204e8bb103ce5af87be25e251bccda5461d74bbc" />
+
+	<!-- Tooltips -->
+	<script type="text/javascript">
+		window.tooltips = []
+		$(document).ready(function() {
+			$('code.inline').each(function(i, block) {
+				hljs.highlightBlock(block);
+			});
+			$('code[data-lang]').each(function(i, block) {
+				hljs.highlightBlock(block);
+			});
+		});
+	</script>
+</head>
+
+
+  <body>
+
+    <header class="navigation" role="banner">
+  <div class="navigation-wrapper">
+    <a href="/" class="logo">
+      
+      <img src="/assets/logo.png" alt="주니어 개발자 블로그">
+      
+    </a>
+    <a href="javascript:void(0)" class="navigation-menu-button" id="js-mobile-menu">
+      <i class="fa fa-bars"></i>
+    </a>
+    <nav role="navigation">
+      <ul id="js-navigation-menu" class="navigation-menu show">
+				
+	
+
+	
+
+	
+
+	
+	<li class="nav-link"><a href="/posts/">Posts</a>
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+      </ul>
+    </nav>
+  </div>
+</header>
+
+
+    <div class="page-content">
+        <div class="post">
+
+<div class="post-header-container " >
+  <div class="scrim ">
+    <header class="post-header">
+      <h1 class="title">여러 Spring Boot 서버 H2 접속 설정</h1>
+      <p class="info">by <strong>주니어 개발자</strong></p>
+    </header>
+  </div>
+</div>
+
+<div class="wrapper">
+
+ <span class="page-divider">
+  <span class="one"></span>
+  <span class="two"></span>
+</span>
+ 
+
+<section class="post-meta">
+  <div class="post-date">December 8, 2020</div>
+  <div class="post-categories">
+  in 
+    
+    <a href="/category/spring-boot">Spring-boot</a>
+    
+  
+  </div>
+</section>
+
+<article class="post-content">
+  <p>여러 <code class="highlighter-rouge">Spring Boot</code> 서버에서 <code class="highlighter-rouge">H2</code> 서버에 접속해야 할 경우 다음과 같이 설정한다.<br />
+우선 하나의 서버에서 다음과 같은 <code class="inline">@Configuration</code> 설정을 추가하며 해당 서버를 <code class="inline text" style="color: red; font-weight: bold;">A</code>서버라고 지칭하겠다.</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">H2Config</span> <span class="o">{</span>
+    <span class="nd">@Bean</span><span class="o">(</span><span class="n">initMethod</span> <span class="o">=</span> <span class="s">"start"</span><span class="o">,</span> <span class="n">destroyMethod</span> <span class="o">=</span> <span class="s">"stop"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">Server</span> <span class="nf">inMemoryH2DatabaseServer</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">SQLException</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="nc">Server</span><span class="o">.</span><span class="na">createTcpServer</span><span class="o">(</span>
+                <span class="s">"-tcp"</span><span class="o">,</span> <span class="s">"-tcpAllowOthers"</span><span class="o">,</span> <span class="s">"-tcpPort"</span><span class="o">,</span> <span class="s">"9091"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<p><code class="inline text" style="color: red; font-weight: bold;">A</code>서버의 <code class="highlighter-rouge">H2</code>에 다른 <code class="highlighter-rouge">Spring Boot</code> 서버도 접근 가능하다록 TCP 포트를 개방하는 설정이다.<br />
+다음은 <code class="inline text" style="color: red; font-weight: bold;">A</code>서버 <code class="highlighter-rouge">application.yml</code> 설정으로 초기 테이블 생성과 데이터 생성을 위한 설정을 하였다.</p>
+<ul>
+  <li>application.yml - <code class="inline text" style="color: red; font-weight: bold;">A</code>서버</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-yml" data-lang="yml"><span class="nn">...</span>
+<span class="na">spring</span><span class="pi">:</span>
+  <span class="na">datasource</span><span class="pi">:</span>
+    <span class="na">url</span><span class="pi">:</span> <span class="s">jdbc:h2:mem:testdb</span>
+    <span class="na">username</span><span class="pi">:</span> <span class="s">sa</span>
+    <span class="na">password</span><span class="pi">:</span>
+    <span class="na">driver-class-name</span><span class="pi">:</span> <span class="s">org.h2.Driver</span>
+  <span class="na">jpa</span><span class="pi">:</span> <span class="c1">#초기 데이터 입력을 위한 설정 - Hello.java, resources/data.sql</span>
+    <span class="na">generate-ddl</span><span class="pi">:</span> <span class="no">true</span>
+    <span class="na">hibernate</span><span class="pi">:</span>
+      <span class="na">ddl-auto</span><span class="pi">:</span> <span class="s">create</span> </code></pre></figure>
+
+<p><code class="inline text" style="color: red; font-weight: bold;">A</code>서버 프로젝트의 자세한 소스는 <a href="https://github.com/Jr-Developers/h2server1">여기</a>를 확인하며
+<code class="inline text" style="color: red; font-weight: bold;">A</code>서버가 아닌 다른 접근 하는 서버를 <code class="inline text" style="color: blue; font-weight: bold;">B</code>서버라고 지칭하겠다.<br />
+<code class="inline text" style="color: blue; font-weight: bold;">B</code>서버에서는 단순히 <code class="inline text" style="color: red; font-weight: bold;">A</code>서버의 <code class="highlighter-rouge">H2</code> 서버의 데이터를 조회 할 것이다.
+다음은 <code class="inline text" style="color: blue; font-weight: bold;">B</code>서버의 <code class="highlighter-rouge">application.yml</code>이다.</p>
+<ul>
+  <li>application.yml - <code class="inline text" style="color: blue; font-weight: bold;">B</code>서버</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-yml" data-lang="yml"><span class="nn">...</span>
+<span class="na">spring</span><span class="pi">:</span>
+  <span class="na">datasource</span><span class="pi">:</span> <span class="c1"># A서버에서 기동 및 포트를 개방한 H2</span>
+    <span class="na">url</span><span class="pi">:</span> <span class="s">jdbc:h2:tcp://localhost:9091/mem:testdb</span>
+    <span class="na">username</span><span class="pi">:</span> <span class="s">sa</span>
+    <span class="na">password</span><span class="pi">:</span>
+    <span class="na">driver-class-name</span><span class="pi">:</span> <span class="s">org.h2.Driver</span>
+  <span class="na">jpa</span><span class="pi">:</span> <span class="c1"># A 서버에서 테이블 생성 및 데이터를 입력 </span>
+    <span class="na">generate-ddl</span><span class="pi">:</span> <span class="no">true</span>
+    <span class="na">hibernate</span><span class="pi">:</span>
+      <span class="na">ddl-auto</span><span class="pi">:</span> <span class="s">none</span></code></pre></figure>
+
+<p><code class="inline text" style="color: blue; font-weight: bold;">B</code>서버 프로젝트의 자세한 소스는 <a href="https://github.com/Jr-Developers/h2server2">여기</a>를 확인하며
+<code class="inline text" style="color: red; font-weight: bold;">A</code>서버에서 기동 중이고 포트를 개방한 <code class="highlighter-rouge">H2</code> 로 접속한다.</p>
+
+<p>다음은 두 서버의 <code class="highlighter-rouge">Spring Boot</code> 메인으로 테스트를 위한 간단한 조회 결과를 응답한다.</p>
+<ul>
+  <li>SpringBootMain</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@SpringBootApplication</span>
+<span class="nd">@RestController</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">H2server1Application</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="nc">HelloRepository</span> <span class="n">helloRepository</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">SpringApplication</span><span class="o">.</span><span class="na">run</span><span class="o">(</span><span class="nc">H2server1Application</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">args</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@GetMapping</span>
+    <span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Hello</span><span class="o">&gt;</span> <span class="nf">test</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="n">helloRepository</span><span class="o">.</span><span class="na">findAll</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<ul>
+  <li>확인 결과</li>
+</ul>
+<p align="center" width="100%">
+    <a href="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/2/1.PNG" data-lightbox="1" data-title="1">
+      <img src="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/2/1.PNG" />
+    </a>
+</p>
+<p><code class="inline text" style="color: red; font-weight: bold;">A</code>서버에서 <code class="highlighter-rouge">H2</code>가 기동되므로 <code class="inline text" style="color: red; font-weight: bold;">A</code>서버 기동 이후 <code class="inline text" style="color: blue; font-weight: bold;">B</code>서버를 기동하여 두 서버 모두 같은 조회 결과를 응답하는 것을 확인하였다.</p>
+
+<ul>
+  <li><code class="inline text" style="color: red; font-weight: bold;">A</code>서버 <a href="https://github.com/Jr-Developers/h2server1">소스</a></li>
+  <li><code class="inline text" style="color: blue; font-weight: bold;">B</code>서버 <a href="https://github.com/Jr-Developers/h2server2">소스</a></li>
+</ul>
+
+
+</article>
+
+
+
+<section class="tags">
+  <strong>Tags:</strong> <a href="/tag/spring-boot">spring-boot</a>,&nbsp;<a href="/tag/spring">spring</a>,&nbsp;<a href="/tag/h2">h2</a>
+</section>
+
+
+
+<section class="rss">
+  <p class="rss-subscribe text"><strong>Subscribe <a href="/feed.xml">via RSS</a></strong></p>
+</section>
+
+<section class="share">
+  <span>Share: </span>
+  
+    
+    
+      <a href="//twitter.com/share?text=%EC%97%AC%EB%9F%AC+Spring+Boot+%EC%84%9C%EB%B2%84+H2+%EC%A0%91%EC%86%8D+%EC%84%A4%EC%A0%95&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot2.html&via=TheBenCentra"
+        onclick="window.open(this.href, 'twitter-share', 'width=550,height=255');return false;">
+        <i class="fa fa-twitter-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+      <a href="//www.facebook.com/sharer.php?t=%EC%97%AC%EB%9F%AC+Spring+Boot+%EC%84%9C%EB%B2%84+H2+%EC%A0%91%EC%86%8D+%EC%84%A4%EC%A0%95&u=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot2.html"
+        onclick="window.open(this.href, 'facebook-share', 'width=550,height=255');return false;">
+        <i class="fa fa-facebook-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+      <a href="//www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot2.html"
+        onclick="window.open(this.href, 'linkedin-share', 'width=550,height=255');return false;">
+        <i class="fa fa-linkedin-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+  
+    
+    
+    
+    
+      <a href="//plus.google.com/share?title=%EC%97%AC%EB%9F%AC+Spring+Boot+%EC%84%9C%EB%B2%84+H2+%EC%A0%91%EC%86%8D+%EC%84%A4%EC%A0%95&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot2.html"
+        onclick="window.open(this.href, 'google-plus-share', 'width=550,height=255');return false;">
+        <i class="fa fa-google-plus-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+      <a href="//www.pinterest.com/pin/create/button/?description=%EC%97%AC%EB%9F%AC+Spring+Boot+%EC%84%9C%EB%B2%84+H2+%EC%A0%91%EC%86%8D+%EC%84%A4%EC%A0%95&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot2.html&media=https://jr-developers.github.io/assets/header_image.jpg"
+        onclick="window.open(this.href, 'pinterest-share', 'width=550,height=255');return false;">
+        <i class="fa fa-pinterest-square fa-lg"></i>
+      </a>
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+      <a href="//www.reddit.com/submit" onclick="window.location = '//www.reddit.com/submit?url=' + encodeURIComponent('https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot2.html') + '&title=여러 Spring Boot 서버 H2 접속 설정'; return false">
+        <i class="fa fa-reddit-square fa-lg"></i>
+      </a>
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+</section>
+
+
+
+
+<section class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'jr-developers-github-io';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</section>
+
+
+
+</div>
+</div>
+
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h3 class="footer-heading">주니어 개발자 블로그</h3>
+
+    <div class="site-navigation">
+
+      <p><strong>Site Map</strong></p>
+      <ul class="pages">
+				
+	
+
+	
+
+	
+
+	
+	<li class="nav-link"><a href="/posts/">Posts</a>
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+      </ul>
+    </div>
+
+    <div class="site-contact">
+
+      <p><strong>Contact</strong></p>
+      <ul class="social-media-list">
+        <li>
+          <a href="mailto:jr.developerss@gmail.com">
+            <i class="fa fa-envelope-o"></i>
+            <span class="username">jr.developerss@gmail.com</span>
+          </a>
+        </li>
+
+        
+          
+        
+          
+        
+          
+          <li>
+            <a href="https://github.com/jr-developers" title="Fork me on GitHub">
+              <i class="fa fa-github"></i>
+              <span class="username">jr-developer</span>
+            </a>
+          </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+
+      </ul>
+    </div>
+
+    <div class="site-signature">
+      <p class="rss-subscribe text"><strong>Subscribe <a href="/feed.xml">via RSS</a></strong></p>
+      <p class="text">A simple yet classy theme for your Jekyll website or blog.
+</p>
+    </div>
+
+  </div>
+
+</footer>
+
+<!-- Scripts -->
+<script src="//code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.1/js/lightbox.min.js"></script>
+<script src="//unpkg.com/popper.js@1"></script>
+<script src="//unpkg.com/tippy.js@5"></script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+  // Default syntax highlighting
+  hljs.initHighlightingOnLoad();
+
+  // Header
+  var menuToggle = $('#js-mobile-menu').unbind();
+  $('#js-navigation-menu').removeClass("show");
+  menuToggle.on('click', function(e) {
+    e.preventDefault();
+    $('#js-navigation-menu').slideToggle(function(){
+      if($('#js-navigation-menu').is(':hidden')) {
+        $('#js-navigation-menu').removeAttr('style');
+      }
+    });
+  });
+
+	// Enable tooltips via Tippy.js
+	if (Array.isArray(window.tooltips)) {
+		window.tooltips.forEach(function(tooltip) {
+			var selector = tooltip[0];
+			var config = tooltip[1];
+			tippy(selector, config);
+		})
+	}
+});
+
+</script>
+
+
+
+
+
+
+  </body>
+
+</html>

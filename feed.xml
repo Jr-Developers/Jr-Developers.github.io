@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>주니어 개발자 블로그</title>
+    <description>A simple yet classy theme for your Jekyll website or blog.
+</description>
+    <link>https://jr-developers.github.io/</link>
+    <atom:link href="https://jr-developers.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Sat, 19 Dec 2020 17:31:07 +0900</pubDate>
+    <lastBuildDate>Sat, 19 Dec 2020 17:31:07 +0900</lastBuildDate>
+    <generator>Jekyll v3.8.6</generator>
+    
+      <item>
+        <title>Multi DataSource Transaction Manager 설정</title>
+        <description>&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Multi DataSource&lt;/code&gt;를 구성하여 테스트 하던 중 하나의 &lt;code class=&quot;highlighter-rouge&quot;&gt;Transaction&lt;/code&gt;에서 &lt;code class=&quot;highlighter-rouge&quot;&gt;Multi DataSource&lt;/code&gt;의 &lt;code class=&quot;highlighter-rouge&quot;&gt;Transaction&lt;/code&gt;이 하나로 묶여 동작하지 않는 것을 확인하였다.&lt;br /&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;DataSource&lt;/code&gt;는 각각의 &lt;code class=&quot;highlighter-rouge&quot;&gt;PlatformTransactionManger&lt;/code&gt;(JAP:&lt;code class=&quot;highlighter-rouge&quot;&gt;JpaTransactionManager&lt;/code&gt;, MyBatis:&lt;code class=&quot;highlighter-rouge&quot;&gt;DataSourceTransactionManager&lt;/code&gt;)에서...</description>
+        <pubDate>Tue, 08 Dec 2020 20:00:00 +0900</pubDate>
+        <link>https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot6.html</link>
+        <guid isPermaLink="true">https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot6.html</guid>
+        
+        <category>spring-boot</category>
+        
+        <category>datasource</category>
+        
+        <category>multi-datasource</category>
+        
+        <category>transaction</category>
+        
+        
+        <category>spring-boot</category>
+        
+      </item>
+    
+      <item>
+        <title>Spring Boot Log4j2 설정</title>
+        <description>&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Spring Boot&lt;/code&gt;에서는 기본적으로 &lt;a href=&quot;http://logback.qos.ch/&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Logback&lt;/code&gt;&lt;/a&gt;를 사용하기 때문에 &lt;code class=&quot;highlighter-rouge&quot;&gt;Logback&lt;/code&gt;의 &lt;code class=&quot;highlighter-rouge&quot;&gt;Dependency&lt;/code&gt;를 제외시키고 &lt;code class=&quot;highlighter-rouge&quot;&gt;Log4j2&lt;/code&gt;를 추가 해야 한다. 자세한 내용은 설정 내용은 &lt;code class=&quot;highlighter-rouge&quot;&gt;Sprinb Boot&lt;/code&gt; &lt;a href=&quot;https://docs.spring.io/spring-boot/docs/current/reference/html/howto.html#howto-configure-log4j-for-logging&quot;&gt;Reference Doc&lt;/a&gt;를 참고한다.&lt;/p&gt;...</description>
+        <pubDate>Tue, 08 Dec 2020 20:00:00 +0900</pubDate>
+        <link>https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot5.html</link>
+        <guid isPermaLink="true">https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot5.html</guid>
+        
+        <category>spring-boot</category>
+        
+        <category>log4j2</category>
+        
+        <category>spring-cloud-sleuth</category>
+        
+        
+        <category>spring-boot</category>
+        
+      </item>
+    
+      <item>
+        <title>Hibernate Event Listener를 이용한 항목 입력 및 로깅</title>
+        <description>&lt;p&gt;DB 등록/수정 시 반복적으로 발생하는 로깅이나 Audit 항목의 입력을 &lt;code class=&quot;highlighter-rouge&quot;&gt;Hibernate Event Listener&lt;/code&gt;를 이용하여 해결가능하다. 하지만 아래와 같은 제약 사항이 존재하므로 참고한다.&lt;/p&gt; &lt;blockquote&gt; &lt;p&gt;In general, the lifecycle method of a...</description>
+        <pubDate>Tue, 08 Dec 2020 20:00:00 +0900</pubDate>
+        <link>https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot4.html</link>
+        <guid isPermaLink="true">https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot4.html</guid>
+        
+        <category>spring-boot</category>
+        
+        <category>spring-data-jpa</category>
+        
+        <category>datasource</category>
+        
+        <category>jpa</category>
+        
+        <category>hibernate</category>
+        
+        
+        <category>spring-boot</category>
+        
+      </item>
+    
+      <item>
+        <title>Spring Data JPA Multi DataSource</title>
+        <description>&lt;p&gt;DB 서버를 두개를 사용해야 하거나 두 개의 스키마를 사용해야 하는 경우 두 개의 &lt;code class=&quot;highlighter-rouge&quot;&gt;DataSource&lt;/code&gt;를 구성해야 한다.&lt;/p&gt; &lt;p&gt;두 개의 &lt;code class=&quot;highlighter-rouge&quot;&gt;DataSource&lt;/code&gt; 설정을 위해 &lt;code class=&quot;highlighter-rouge&quot;&gt;Spring Boot&lt;/code&gt; Reference Doc&lt;a href=&quot;https://docs.spring.io/spring-boot/docs/current/reference/html/howto.html#howto-two-datasources&quot;&gt;#Configure Two...</description>
+        <pubDate>Tue, 08 Dec 2020 20:00:00 +0900</pubDate>
+        <link>https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot3.html</link>
+        <guid isPermaLink="true">https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot3.html</guid>
+        
+        <category>spring-boot</category>
+        
+        <category>spring-data-jpa</category>
+        
+        <category>datasource</category>
+        
+        <category>jpa</category>
+        
+        
+        <category>spring-boot</category>
+        
+      </item>
+    
+      <item>
+        <title>여러 Spring Boot 서버 H2 접속 설정</title>
+        <description>&lt;p&gt;여러 &lt;code class=&quot;highlighter-rouge&quot;&gt;Spring Boot&lt;/code&gt; 서버에서 &lt;code class=&quot;highlighter-rouge&quot;&gt;H2&lt;/code&gt; 서버에 접속해야 할 경우 다음과 같이 설정한다.&lt;br /&gt; 우선 하나의 서버에서 다음과 같은 &lt;code class=&quot;inline&quot;&gt;@Configuration&lt;/code&gt; 설정을 추가하며 해당 서버를 &lt;code class=&quot;inline text&quot; style=&quot;color:...</description>
+        <pubDate>Tue, 08 Dec 2020 20:00:00 +0900</pubDate>
+        <link>https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot2.html</link>
+        <guid isPermaLink="true">https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot2.html</guid>
+        
+        <category>spring-boot</category>
+        
+        <category>spring</category>
+        
+        <category>h2</category>
+        
+        
+        <category>spring-boot</category>
+        
+      </item>
+    
+      <item>
+        <title>Spring Initializr를 사용한 Spring Boot 프로젝트 생성</title>
+        <description>&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Spring&lt;/code&gt;에서는 &lt;code class=&quot;highlighter-rouge&quot;&gt;Spring Boot&lt;/code&gt; 프로젝트의 생성을 위해 &lt;code class=&quot;highlighter-rouge&quot;&gt;Dependency&lt;/code&gt;, &lt;span class=&quot;tooltip&quot; id=&quot;build&quot;&gt;Build Tool&lt;/span&gt;, &lt;span class=&quot;tooltip&quot; id=&quot;lang&quot;&gt;언어&lt;/span&gt;등을 쉽게 선택하여 프로젝트를 생성할 수 있는 &lt;a href=&quot;https://start.spring.io/&quot;&gt;사이트&lt;/a&gt;를 제공한다.&lt;/p&gt; &lt;p align=&quot;center&quot; width=&quot;100%&quot;&gt; &lt;a...</description>
+        <pubDate>Tue, 08 Dec 2020 20:00:00 +0900</pubDate>
+        <link>https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot1.html</link>
+        <guid isPermaLink="true">https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot1.html</guid>
+        
+        <category>spring-boot</category>
+        
+        <category>spring</category>
+        
+        <category>spring-initializr</category>
+        
+        
+        <category>spring-boot</category>
+        
+      </item>
+    
+      <item>
+        <title>Jekyll Github Page 미지원 Plugin 빌드 배포</title>
+        <description>&lt;p&gt;&lt;a href=&quot;https://jekyll-themes.com/&quot;&gt;jekyll-theme&lt;/a&gt;를 &lt;a href=&quot;https://jekyll-themes.com/centrarium/&quot;&gt;centrarium&lt;/a&gt;로 선택하여 로컬에서는 정상적으로 기동되는 것을 확인하였다.&lt;br /&gt;하지만 &lt;code class=&quot;highlighter-rouge&quot;&gt;GitHub&lt;/code&gt; 에 &lt;code class=&quot;highlighter-rouge&quot;&gt;Push&lt;/code&gt; 후 &lt;code class=&quot;highlighter-rouge&quot;&gt;GitHub Pages&lt;/code&gt;에서 기본적으로 지원하는 &lt;code class=&quot;highlighter-rouge&quot;&gt;CI/CD&lt;/code&gt;가 이루어져 HTML들이 생성되었지만 &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll-paginate-v2&lt;/code&gt;, &lt;code...</description>
+        <pubDate>Tue, 08 Dec 2020 20:00:00 +0900</pubDate>
+        <link>https://jr-developers.github.io/blog/2020/12/08/blog1.html</link>
+        <guid isPermaLink="true">https://jr-developers.github.io/blog/2020/12/08/blog1.html</guid>
+        
+        <category>jekyll</category>
+        
+        <category>jekyll-archives</category>
+        
+        <category>jekyll-paginate-v2</category>
+        
+        <category>github-pages</category>
+        
+        <category>gitgub</category>
+        
+        
+        <category>blog</category>
+        
+      </item>
+    
+  </channel>
+</rss>

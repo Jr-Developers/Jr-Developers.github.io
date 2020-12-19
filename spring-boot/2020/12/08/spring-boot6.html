@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Multi DataSource Transaction Manager 설정</title>
+  <meta name="description" content="Multi DataSource를 구성하여 테스트 하던 중 하나의 Transaction에서 Multi DataSource의 Transaction이 하나로 묶여 동작하지 않는 것을 확인하였다.DataSource는 각각의 PlatformTransactionManger(JAP:JpaTra...">
+  
+  <meta name="author" content="주니어 개발자">
+  <meta name="copyright" content="&copy; 주니어 개발자 2020">
+  
+
+  <!-- External libraries -->
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.4.1/styles/monokai-sublime.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/lightbox2/2.7.1/css/lightbox.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <!-- Favicon and other icons (made with http://www.favicon-generator.org/) -->
+  <link rel="shortcut icon" href="/assets/icons/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/assets/icons/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/icons/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/assets/icons/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/assets/icons/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/assets/icons/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/assets/icons/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/assets/icons/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/assets/icons/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/assets/icons/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="/assets/icons/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/icons/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+  <link rel="manifest" href="/assets/icons/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/assets/icons/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+
+  
+  <!-- Facebook OGP cards -->
+  <meta property="og:description" content="Multi DataSource를 구성하여 테스트 하던 중 하나의 Transaction에서 Multi DataSource의 Transaction이 하나로 묶여 동작하지 않는 것을 확인하였다.DataSource는 각각의 PlatformTransactionManger(JAP:JpaTra..." />
+  <meta property="og:url" content="https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot6.html">
+  <meta property="og:site_name" content="주니어 개발자 블로그" />
+  <meta property="og:title" content="Multi DataSource Transaction Manager 설정" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://jr-developers.github.io/assets/logo.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="612" />
+  <meta property="og:image:height" content="605" />
+  
+
+  
+  <!-- Twitter: card tags -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Multi DataSource Transaction Manager 설정">
+  <meta name="twitter:description" content="Multi DataSource를 구성하여 테스트 하던 중 하나의 Transaction에서 Multi DataSource의 Transaction이 하나로 묶여 동작하지 않는 것을 확인하였다.DataSource는 각각의 PlatformTransactionManger(JAP:JpaTra...">
+  <meta name="twitter:image" content="https://jr-developers.github.io/assets/logo.png">
+  <meta name="twitter:url" content="https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot6.html">
+  
+
+  
+
+  <!-- Site styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot6.html">
+	<link rel="alternate" type="application/rss+xml" title="주니어 개발자 블로그" href="https://jr-developers.github.io/feed.xml" />
+
+	<meta name="google-site-verification" content="Taa5vT48o67ok6s5-GcjwD8baYRy1FzqTZQ2-Hz_zkY" />
+	<meta name="naver-site-verification" content="204e8bb103ce5af87be25e251bccda5461d74bbc" />
+
+	<!-- Tooltips -->
+	<script type="text/javascript">
+		window.tooltips = []
+		$(document).ready(function() {
+			$('code.inline').each(function(i, block) {
+				hljs.highlightBlock(block);
+			});
+			$('code[data-lang]').each(function(i, block) {
+				hljs.highlightBlock(block);
+			});
+		});
+	</script>
+</head>
+
+
+  <body>
+
+    <header class="navigation" role="banner">
+  <div class="navigation-wrapper">
+    <a href="/" class="logo">
+      
+      <img src="/assets/logo.png" alt="주니어 개발자 블로그">
+      
+    </a>
+    <a href="javascript:void(0)" class="navigation-menu-button" id="js-mobile-menu">
+      <i class="fa fa-bars"></i>
+    </a>
+    <nav role="navigation">
+      <ul id="js-navigation-menu" class="navigation-menu show">
+				
+	
+
+	
+
+	
+
+	
+	<li class="nav-link"><a href="/posts/">Posts</a>
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+      </ul>
+    </nav>
+  </div>
+</header>
+
+
+    <div class="page-content">
+        <div class="post">
+
+<div class="post-header-container " >
+  <div class="scrim ">
+    <header class="post-header">
+      <h1 class="title">Multi DataSource Transaction Manager 설정</h1>
+      <p class="info">by <strong>주니어 개발자</strong></p>
+    </header>
+  </div>
+</div>
+
+<div class="wrapper">
+
+ <span class="page-divider">
+  <span class="one"></span>
+  <span class="two"></span>
+</span>
+ 
+
+<section class="post-meta">
+  <div class="post-date">December 8, 2020</div>
+  <div class="post-categories">
+  in 
+    
+    <a href="/category/spring-boot">Spring-boot</a>
+    
+  
+  </div>
+</section>
+
+<article class="post-content">
+  <p><code class="highlighter-rouge">Multi DataSource</code>를 구성하여 테스트 하던 중 하나의 <code class="highlighter-rouge">Transaction</code>에서 <code class="highlighter-rouge">Multi DataSource</code>의 <code class="highlighter-rouge">Transaction</code>이 하나로 묶여 동작하지 않는 것을 확인하였다.<br />
+<code class="highlighter-rouge">DataSource</code>는 각각의 <code class="highlighter-rouge">PlatformTransactionManger</code>(JAP:<code class="highlighter-rouge">JpaTransactionManager</code>, MyBatis:<code class="highlighter-rouge">DataSourceTransactionManager</code>)에서 <code class="highlighter-rouge">Transaction</code>을 관리하며 <code class="inline">@Transactional</code>에 별도의 <code class="highlighter-rouge">TransacationManager</code>를 지정하지 않을 경우 <code class="inline">@Primary</code>로 지정한 <code class="highlighter-rouge">TrasactionManager</code>가 지정된다.<br />
+이에 따라 추가적인 설정 없이 <code class="highlighter-rouge">Multi DataSource</code>을 이용하여 저장, 수정시 <code class="highlighter-rouge">Exception</code> 발생시 하나의 <code class="highlighter-rouge">Transaction</code>으로 <code class="highlighter-rouge">Rollback</code>이 동작하지 않는 경우가 발생 하였다.</p>
+
+<hr />
+
+<ul>
+  <li>application.yml</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-yml" data-lang="yml"><span class="na">spring</span><span class="pi">:</span>
+  <span class="na">datasource1</span><span class="pi">:</span>
+    <span class="na">url</span><span class="pi">:</span> <span class="s">jdbc:h2:mem:clubdb</span>
+    <span class="na">username</span><span class="pi">:</span> <span class="s">sa</span>
+    <span class="na">password</span><span class="pi">:</span>
+    <span class="na">driver-class-name</span><span class="pi">:</span> <span class="s">org.h2.Driver</span>
+    <span class="na">hikari</span><span class="pi">:</span>
+      <span class="na">minimum-idle</span><span class="pi">:</span> <span class="m">1</span>
+      <span class="na">maximum-pool-size</span><span class="pi">:</span> <span class="m">10</span>
+  <span class="na">datasource2</span><span class="pi">:</span>
+    <span class="na">url</span><span class="pi">:</span> <span class="s">jdbc:h2:mem:userdb</span>
+    <span class="na">username</span><span class="pi">:</span> <span class="s">sa</span>
+    <span class="na">password</span><span class="pi">:</span>
+    <span class="na">driver-class-name</span><span class="pi">:</span> <span class="s">org.h2.Driver</span>
+    <span class="na">hikari</span><span class="pi">:</span>
+      <span class="na">minimum-idle</span><span class="pi">:</span> <span class="m">1</span>
+      <span class="na">maximum-pool-size</span><span class="pi">:</span> <span class="m">10</span>
+<span class="nn">...</span></code></pre></figure>
+
+<ul>
+  <li>ClubDataSourceConfig.java - 첫 번째 DataSource</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Configuration</span>
+<span class="nd">@EnableJpaRepositories</span><span class="o">(</span>
+        <span class="n">basePackages</span> <span class="o">=</span> <span class="o">{</span><span class="s">"io.github.jr.developers.txmanager.club"</span><span class="o">},</span>
+        <span class="n">entityManagerFactoryRef</span> <span class="o">=</span> <span class="s">"clubEntityManagerFactory"</span><span class="o">,</span>
+        <span class="n">transactionManagerRef</span> <span class="o">=</span> <span class="s">"clubTransactionManager"</span>
+<span class="o">)</span>
+    <span class="kd">public</span> <span class="kd">class</span> <span class="nc">ClubDataSourceConfig</span> <span class="o">{</span>
+
+    <span class="nd">@Bean</span>
+    <span class="nd">@Primary</span>
+    <span class="nd">@ConfigurationProperties</span><span class="o">(</span><span class="s">"spring.datasource1"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">DataSourceProperties</span> <span class="nf">clubDataSourceProperties</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">DataSourceProperties</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Bean</span>
+    <span class="nd">@Primary</span>
+    <span class="nd">@ConfigurationProperties</span><span class="o">(</span><span class="s">"spring.datasource1.hikari"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">HikariDataSource</span> <span class="nf">clubHikariDataSource</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="nf">clubDataSourceProperties</span><span class="o">().</span><span class="na">initializeDataSourceBuilder</span><span class="o">().</span><span class="na">type</span><span class="o">(</span><span class="nc">HikariDataSource</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="na">build</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Bean</span>
+    <span class="nd">@Primary</span>
+    <span class="kd">public</span> <span class="nc">LocalContainerEntityManagerFactoryBean</span> <span class="nf">clubEntityManagerFactory</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">HibernateJpaVendorAdapter</span> <span class="n">jpaVendorAdapter</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HibernateJpaVendorAdapter</span><span class="o">();</span>
+        <span class="n">jpaVendorAdapter</span><span class="o">.</span><span class="na">setGenerateDdl</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+        <span class="nc">LocalContainerEntityManagerFactoryBean</span> <span class="n">factoryBean</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">LocalContainerEntityManagerFactoryBean</span><span class="o">();</span>
+        <span class="n">factoryBean</span><span class="o">.</span><span class="na">setJpaVendorAdapter</span><span class="o">(</span><span class="n">jpaVendorAdapter</span><span class="o">);</span>
+        <span class="n">factoryBean</span><span class="o">.</span><span class="na">setDataSource</span><span class="o">(</span><span class="n">clubHikariDataSource</span><span class="o">());</span>
+        <span class="n">factoryBean</span><span class="o">.</span><span class="na">setPackagesToScan</span><span class="o">(</span><span class="s">"io.github.jr.developers.txmanager.club"</span><span class="o">);</span>
+        <span class="n">factoryBean</span><span class="o">.</span><span class="na">setPersistenceUnitName</span><span class="o">(</span><span class="s">"clubEntityManager"</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">factoryBean</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Bean</span>
+    <span class="nd">@Primary</span>
+    <span class="kd">public</span> <span class="nc">PlatformTransactionManager</span> <span class="nf">clubTransactionManager</span><span class="o">(</span><span class="nd">@Qualifier</span><span class="o">(</span><span class="s">"clubEntityManagerFactory"</span><span class="o">)</span> <span class="nc">EntityManagerFactory</span> <span class="n">entityManagerFactory</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">JpaTransactionManager</span><span class="o">(</span><span class="n">entityManagerFactory</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<ul>
+  <li>UserDataSourceConfig.java - 두 번째 DataSource</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Configuration</span>
+<span class="nd">@EnableJpaRepositories</span><span class="o">(</span>
+        <span class="n">basePackages</span> <span class="o">=</span> <span class="o">{</span><span class="s">"io.github.jr.developers.txmanager.user"</span><span class="o">},</span>
+        <span class="n">entityManagerFactoryRef</span> <span class="o">=</span> <span class="s">"userEntityManagerFactory"</span><span class="o">,</span>
+        <span class="n">transactionManagerRef</span> <span class="o">=</span> <span class="s">"userTransactionManager"</span>
+<span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserDataSourceConfig</span> <span class="o">{</span>
+
+    <span class="nd">@Bean</span>
+    <span class="nd">@ConfigurationProperties</span><span class="o">(</span><span class="s">"spring.datasource2"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">DataSourceProperties</span> <span class="nf">userDataSourceProperties</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">DataSourceProperties</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Bean</span>
+    <span class="nd">@ConfigurationProperties</span><span class="o">(</span><span class="s">"spring.datasource2.hikari"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">HikariDataSource</span> <span class="nf">userHikariDataSource</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="nf">userDataSourceProperties</span><span class="o">().</span><span class="na">initializeDataSourceBuilder</span><span class="o">().</span><span class="na">type</span><span class="o">(</span><span class="nc">HikariDataSource</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="na">build</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">LocalContainerEntityManagerFactoryBean</span> <span class="nf">userEntityManagerFactory</span><span class="o">(){</span>
+        <span class="nc">HibernateJpaVendorAdapter</span> <span class="n">vendorAdapter</span> <span class="o">=</span>  <span class="k">new</span> <span class="nc">HibernateJpaVendorAdapter</span><span class="o">();</span>
+        <span class="n">vendorAdapter</span><span class="o">.</span><span class="na">setGenerateDdl</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+
+        <span class="nc">LocalContainerEntityManagerFactoryBean</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">LocalContainerEntityManagerFactoryBean</span><span class="o">();</span>
+        <span class="n">factory</span><span class="o">.</span><span class="na">setJpaVendorAdapter</span><span class="o">(</span><span class="n">vendorAdapter</span><span class="o">);</span>
+        <span class="n">factory</span><span class="o">.</span><span class="na">setDataSource</span><span class="o">(</span><span class="n">userHikariDataSource</span><span class="o">());</span>
+        <span class="n">factory</span><span class="o">.</span><span class="na">setPackagesToScan</span><span class="o">(</span><span class="s">"io.github.jr.developers.txmanager.user"</span><span class="o">);</span>
+        <span class="n">factory</span><span class="o">.</span><span class="na">setPersistenceUnitName</span><span class="o">(</span><span class="s">"userEntityManager"</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">factory</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">PlatformTransactionManager</span> <span class="nf">userTransactionManager</span><span class="o">(</span><span class="nd">@Qualifier</span><span class="o">(</span><span class="s">"userEntityManagerFactory"</span><span class="o">)</span> <span class="nc">EntityManagerFactory</span> <span class="n">entityManagerFactory</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">JpaTransactionManager</span><span class="o">(</span><span class="n">entityManagerFactory</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<hr />
+
+<ul>
+  <li>테스트 로직</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java">    <span class="o">...</span>
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/commit"</span><span class="o">)</span>
+    <span class="nd">@Transactional</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">commit</span><span class="o">(){</span>
+        <span class="nc">Club</span> <span class="n">club</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Club</span><span class="o">();</span>
+        <span class="n">club</span><span class="o">.</span><span class="na">setId</span><span class="o">(</span><span class="s">"Commit"</span><span class="o">);</span>
+        <span class="nc">User</span> <span class="n">user</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">User</span><span class="o">();</span>
+        <span class="n">user</span><span class="o">.</span><span class="na">setId</span><span class="o">(</span><span class="s">"Commit"</span><span class="o">);</span>
+
+        <span class="n">clubService</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">club</span><span class="o">);</span>
+        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">3000</span><span class="o">);</span>
+        <span class="n">userService</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">user</span><span class="o">);</span>
+        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">3000</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/rollback"</span><span class="o">)</span>
+    <span class="nd">@Transactional</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">rollback</span><span class="o">(){</span>
+        <span class="nc">Club</span> <span class="n">club</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Club</span><span class="o">();</span>
+        <span class="n">club</span><span class="o">.</span><span class="na">setId</span><span class="o">(</span><span class="s">"Rollback"</span><span class="o">);</span>
+        <span class="nc">User</span> <span class="n">user</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">User</span><span class="o">();</span>
+        <span class="n">user</span><span class="o">.</span><span class="na">setId</span><span class="o">(</span><span class="s">"Rollback"</span><span class="o">);</span>
+
+        <span class="n">clubService</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">club</span><span class="o">);</span>
+        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">3000</span><span class="o">);</span>
+        <span class="n">userService</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">user</span><span class="o">);</span>
+        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">3000</span><span class="o">);</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">();</span>
+    <span class="o">}</span>
+    <span class="o">...</span></code></pre></figure>
+
+<hr />
+
+<p>먼저 추가적이 설정 없이 <code class="highlighter-rouge">commit</code> 메소드를 실행시 <code class="highlighter-rouge">Club</code>과 <code class="highlighter-rouge">User</code> 모두 정상적으로 저장된것을 확인하였다.
+<a href="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/6/1.JPG" data-lightbox="1" data-title="1">
+  <img src="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/6/1.JPG" />
+</a>
+하지만 로그를 확인해보면 <code class="highlighter-rouge">insert</code>를 위한 <code class="highlighter-rouge">select</code>의 실행 순서와 <code class="highlighter-rouge">insert</code> 실행 순서가 다른것이 확인된다.<br />
+우선 <code class="highlighter-rouge">Exception</code> 발생시를 먼저 확인해 보겠다.
+<a href="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/6/2.JPG" data-lightbox="1" data-title="1">
+  <img src="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/6/2.JPG" />
+</a>
+<code class="highlighter-rouge">USER</code> 테이블에는 정상적으로 <code class="highlighter-rouge">Rollback</code>이 수행되었지만 <code class="highlighter-rouge">USER</code> 테이블에는 <code class="highlighter-rouge">Commit</code>이 수행되었다.</p>
+
+<p>테스트를 위한 <code class="highlighter-rouge">commit</code> 메소드의 로그를 보면 <code class="highlighter-rouge">User</code>의 <code class="highlighter-rouge">insert</code> 실행은 59초이며 <code class="highlighter-rouge">Club</code>의 <code class="highlighter-rouge">insert</code> 실행은 3초 이후에 이루어 졌다.<br />
+ 이는 <code class="highlighter-rouge">Club</code>의 <code class="highlighter-rouge">Transaction</code>의 시작은 <code class="inline">@Transactional</code>이 선언된 <code class="inline">public void commit()</code>메소드의 시작이고 끝은 <code class="inline">public void commit()</code>메소드의 종료 이다. 이에 따라 <code class="highlighter-rouge">Club</code>의 <code class="highlighter-rouge">insert</code>는 메소드 종료 시점에 발생한것이다.<br />
+ <code class="highlighter-rouge">User</code>의 <code class="inline">userService.create(user)</code>도 해당 <code class="highlighter-rouge">Transaction</code>의 참여했다면 <code class="inline">public void commit()</code>메소드 종료 시점에 <code class="highlighter-rouge">insert</code>가 발생했겠지만 그렇지 못하고 새로운 <code class="highlighter-rouge">Transacation</code>을 발생시켜 <code class="inline">userService.create(user)</code> 메소드 실행 직후 <code class="highlighter-rouge">insert</code>가 발생하였다.<br />
+ 이에 따라 <code class="highlighter-rouge">Exception</code>이 발생하였지만 <code class="highlighter-rouge">User</code>의 <code class="inline">userService.create(user)</code>은 다른 <code class="highlighter-rouge">Transacation</code>이기 때문에 이미 <code class="highlighter-rouge">Commit</code>이 수행 된이후 <code class="highlighter-rouge">RuntimeException</code>의 발생으로 <code class="highlighter-rouge">Club</code>의 <code class="highlighter-rouge">Transaction</code>의 <code class="highlighter-rouge">Rollback</code>이 수행된 것이다.</p>
+
+<hr />
+
+<p>이를 위한 해결 방법은 <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-jta"><code class="highlighter-rouge">JTA</code></a>와 <a href="https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/transaction/ChainedTransactionManager.java"><code class="highlighter-rouge">ChainedTransactionManager</code></a>가 존재한다. <code class="highlighter-rouge">JTA</code>는 별도로 공부를 해야할 부분이 존재하여 <code class="highlighter-rouge">ChainedTransactionManager</code>를 이용하여 <code class="highlighter-rouge">Transcation</code>을 하나로 묶어보겠다.<br />
+하지만 <code class="highlighter-rouge">ChainedTransactionManager</code>은 Java의 비지니스 로직에서 발생하는 <code class="highlighter-rouge">Exception</code>의 경우 <code class="highlighter-rouge">Rollback</code>이 가능하지만 비지니스 로직 이후 <code class="highlighter-rouge">Commit</code>이 발생하여 <code class="highlighter-rouge">DB</code>에서 <code class="highlighter-rouge">Exception</code>이 발생하는 경우에는 <code class="highlighter-rouge">Rollback</code>이 불가능하다. 이에 따라 <code class="highlighter-rouge">ChainedTransactionManager</code> 생성시 <code class="highlighter-rouge">DB</code>에서 <code class="highlighter-rouge">Exception</code>이 발생할 가능성이 높은 <code class="highlighter-rouge">TransactionManager</code>를 생성자의 마지막에 설정해야한다.</p>
+<blockquote>
+  <p>The configured instances will start transactions in the order given and commit/rollback in <em>reverse</em> order, which means the  PlatformTransactionManager most likely to break the transaction should be the <em>last</em> in the list configured. A PlatformTransactionManager throwing an exception during commit will automatically cause the remaining transaction managers to roll back instead of committing.</p>
+</blockquote>
+
+<ul>
+  <li>ChainedTransactionManagerConfig</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ChainedTransactionManagerConfig</span> <span class="o">{</span>
+
+    <span class="nd">@Bean</span>
+    <span class="nd">@Primary</span> <span class="c1">// 기존에 정의한 @Primary는 해당 PlatformTransactionManager로 변경</span>
+    <span class="kd">public</span> <span class="nc">PlatformTransactionManager</span> <span class="nf">chainedTransactionManager</span><span class="o">(</span>
+            <span class="nd">@Qualifier</span><span class="o">(</span><span class="s">"clubTransactionManager"</span><span class="o">)</span> <span class="nc">PlatformTransactionManager</span> <span class="n">clubTransactionManager</span><span class="o">,</span>
+            <span class="nd">@Qualifier</span><span class="o">(</span><span class="s">"userTransactionManager"</span><span class="o">)</span> <span class="nc">PlatformTransactionManager</span> <span class="n">userTransactionManager</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">ChainedTransactionManager</span><span class="o">(</span><span class="n">clubTransactionManager</span><span class="o">,</span> <span class="n">userTransactionManager</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<ul>
+  <li>
+    <p>ChainedTransactionManager 적용 - Commit
+<a href="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/6/3.JPG" data-lightbox="1" data-title="1">
+<img src="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/6/3.JPG" />
+</a>
+정상적으로 <code class="inline">public void commit()</code> 메소드 종료이후 <code class="highlighter-rouge">Club</code>과 <code class="highlighter-rouge">User</code>의 <code class="highlighter-rouge">insert</code>가 실행되는것으로 확인되었다.</p>
+  </li>
+  <li>
+    <p>ChainedTransactionManager 적용 - Rollbacks
+<a href="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/6/4.JPG" data-lightbox="1" data-title="1">
+<img src="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/6/4.JPG" />
+</a>
+정상적으로 <code class="inline">public void rollback()</code> 메소드 안에서 <code class="highlighter-rouge">Exception</code> 발생시 <code class="highlighter-rouge">insert</code>가 실행되지 않는것으로 확인되었다.</p>
+  </li>
+  <li>
+    <p>txmanager <a href="https://github.com/Jr-Developers/txmanager">소스</a></p>
+  </li>
+</ul>
+
+</article>
+
+
+
+<section class="tags">
+  <strong>Tags:</strong> <a href="/tag/spring-boot">spring-boot</a>,&nbsp;<a href="/tag/datasource">datasource</a>,&nbsp;<a href="/tag/multi-datasource">multi-datasource</a>,&nbsp;<a href="/tag/transaction">transaction</a>
+</section>
+
+
+
+<section class="rss">
+  <p class="rss-subscribe text"><strong>Subscribe <a href="/feed.xml">via RSS</a></strong></p>
+</section>
+
+<section class="share">
+  <span>Share: </span>
+  
+    
+    
+      <a href="//twitter.com/share?text=Multi+DataSource+Transaction+Manager+%EC%84%A4%EC%A0%95&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot6.html&via=TheBenCentra"
+        onclick="window.open(this.href, 'twitter-share', 'width=550,height=255');return false;">
+        <i class="fa fa-twitter-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+      <a href="//www.facebook.com/sharer.php?t=Multi+DataSource+Transaction+Manager+%EC%84%A4%EC%A0%95&u=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot6.html"
+        onclick="window.open(this.href, 'facebook-share', 'width=550,height=255');return false;">
+        <i class="fa fa-facebook-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+      <a href="//www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot6.html"
+        onclick="window.open(this.href, 'linkedin-share', 'width=550,height=255');return false;">
+        <i class="fa fa-linkedin-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+  
+    
+    
+    
+    
+      <a href="//plus.google.com/share?title=Multi+DataSource+Transaction+Manager+%EC%84%A4%EC%A0%95&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot6.html"
+        onclick="window.open(this.href, 'google-plus-share', 'width=550,height=255');return false;">
+        <i class="fa fa-google-plus-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+      <a href="//www.pinterest.com/pin/create/button/?description=Multi+DataSource+Transaction+Manager+%EC%84%A4%EC%A0%95&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot6.html&media=https://jr-developers.github.io/assets/header_image.jpg"
+        onclick="window.open(this.href, 'pinterest-share', 'width=550,height=255');return false;">
+        <i class="fa fa-pinterest-square fa-lg"></i>
+      </a>
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+      <a href="//www.reddit.com/submit" onclick="window.location = '//www.reddit.com/submit?url=' + encodeURIComponent('https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot6.html') + '&title=Multi DataSource Transaction Manager 설정'; return false">
+        <i class="fa fa-reddit-square fa-lg"></i>
+      </a>
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+</section>
+
+
+
+
+<section class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'jr-developers-github-io';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</section>
+
+
+
+</div>
+</div>
+
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h3 class="footer-heading">주니어 개발자 블로그</h3>
+
+    <div class="site-navigation">
+
+      <p><strong>Site Map</strong></p>
+      <ul class="pages">
+				
+	
+
+	
+
+	
+
+	
+	<li class="nav-link"><a href="/posts/">Posts</a>
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+      </ul>
+    </div>
+
+    <div class="site-contact">
+
+      <p><strong>Contact</strong></p>
+      <ul class="social-media-list">
+        <li>
+          <a href="mailto:jr.developerss@gmail.com">
+            <i class="fa fa-envelope-o"></i>
+            <span class="username">jr.developerss@gmail.com</span>
+          </a>
+        </li>
+
+        
+          
+        
+          
+        
+          
+          <li>
+            <a href="https://github.com/jr-developers" title="Fork me on GitHub">
+              <i class="fa fa-github"></i>
+              <span class="username">jr-developer</span>
+            </a>
+          </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+
+      </ul>
+    </div>
+
+    <div class="site-signature">
+      <p class="rss-subscribe text"><strong>Subscribe <a href="/feed.xml">via RSS</a></strong></p>
+      <p class="text">A simple yet classy theme for your Jekyll website or blog.
+</p>
+    </div>
+
+  </div>
+
+</footer>
+
+<!-- Scripts -->
+<script src="//code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.1/js/lightbox.min.js"></script>
+<script src="//unpkg.com/popper.js@1"></script>
+<script src="//unpkg.com/tippy.js@5"></script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+  // Default syntax highlighting
+  hljs.initHighlightingOnLoad();
+
+  // Header
+  var menuToggle = $('#js-mobile-menu').unbind();
+  $('#js-navigation-menu').removeClass("show");
+  menuToggle.on('click', function(e) {
+    e.preventDefault();
+    $('#js-navigation-menu').slideToggle(function(){
+      if($('#js-navigation-menu').is(':hidden')) {
+        $('#js-navigation-menu').removeAttr('style');
+      }
+    });
+  });
+
+	// Enable tooltips via Tippy.js
+	if (Array.isArray(window.tooltips)) {
+		window.tooltips.forEach(function(tooltip) {
+			var selector = tooltip[0];
+			var config = tooltip[1];
+			tippy(selector, config);
+		})
+	}
+});
+
+</script>
+
+
+
+
+
+
+  </body>
+
+</html>

@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Spring Boot Log4j2 설정</title>
+  <meta name="description" content="Spring Boot에서는 기본적으로 Logback를 사용하기 때문에 Logback의 Dependency를 제외시키고 Log4j2를 추가 해야 한다. 자세한 내용은 설정 내용은 Sprinb Boot Reference Doc를 참고한다....&lt;dependency&gt;    &...">
+  
+  <meta name="author" content="주니어 개발자">
+  <meta name="copyright" content="&copy; 주니어 개발자 2020">
+  
+
+  <!-- External libraries -->
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.4.1/styles/monokai-sublime.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/lightbox2/2.7.1/css/lightbox.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <!-- Favicon and other icons (made with http://www.favicon-generator.org/) -->
+  <link rel="shortcut icon" href="/assets/icons/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/assets/icons/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/icons/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/assets/icons/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/assets/icons/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/assets/icons/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/assets/icons/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/assets/icons/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/assets/icons/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/assets/icons/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="/assets/icons/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/icons/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+  <link rel="manifest" href="/assets/icons/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/assets/icons/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+
+  
+  <!-- Facebook OGP cards -->
+  <meta property="og:description" content="Spring Boot에서는 기본적으로 Logback를 사용하기 때문에 Logback의 Dependency를 제외시키고 Log4j2를 추가 해야 한다. 자세한 내용은 설정 내용은 Sprinb Boot Reference Doc를 참고한다....&lt;dependency&gt;    &..." />
+  <meta property="og:url" content="https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot5.html">
+  <meta property="og:site_name" content="주니어 개발자 블로그" />
+  <meta property="og:title" content="Spring Boot Log4j2 설정" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://jr-developers.github.io/assets/logo.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="612" />
+  <meta property="og:image:height" content="605" />
+  
+
+  
+  <!-- Twitter: card tags -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Spring Boot Log4j2 설정">
+  <meta name="twitter:description" content="Spring Boot에서는 기본적으로 Logback를 사용하기 때문에 Logback의 Dependency를 제외시키고 Log4j2를 추가 해야 한다. 자세한 내용은 설정 내용은 Sprinb Boot Reference Doc를 참고한다....&lt;dependency&gt;    &...">
+  <meta name="twitter:image" content="https://jr-developers.github.io/assets/logo.png">
+  <meta name="twitter:url" content="https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot5.html">
+  
+
+  
+
+  <!-- Site styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot5.html">
+	<link rel="alternate" type="application/rss+xml" title="주니어 개발자 블로그" href="https://jr-developers.github.io/feed.xml" />
+
+	<meta name="google-site-verification" content="Taa5vT48o67ok6s5-GcjwD8baYRy1FzqTZQ2-Hz_zkY" />
+	<meta name="naver-site-verification" content="204e8bb103ce5af87be25e251bccda5461d74bbc" />
+
+	<!-- Tooltips -->
+	<script type="text/javascript">
+		window.tooltips = []
+		$(document).ready(function() {
+			$('code.inline').each(function(i, block) {
+				hljs.highlightBlock(block);
+			});
+			$('code[data-lang]').each(function(i, block) {
+				hljs.highlightBlock(block);
+			});
+		});
+	</script>
+</head>
+
+
+  <body>
+
+    <header class="navigation" role="banner">
+  <div class="navigation-wrapper">
+    <a href="/" class="logo">
+      
+      <img src="/assets/logo.png" alt="주니어 개발자 블로그">
+      
+    </a>
+    <a href="javascript:void(0)" class="navigation-menu-button" id="js-mobile-menu">
+      <i class="fa fa-bars"></i>
+    </a>
+    <nav role="navigation">
+      <ul id="js-navigation-menu" class="navigation-menu show">
+				
+	
+
+	
+
+	
+
+	
+	<li class="nav-link"><a href="/posts/">Posts</a>
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+      </ul>
+    </nav>
+  </div>
+</header>
+
+
+    <div class="page-content">
+        <div class="post">
+
+<div class="post-header-container " >
+  <div class="scrim ">
+    <header class="post-header">
+      <h1 class="title">Spring Boot Log4j2 설정</h1>
+      <p class="info">by <strong>주니어 개발자</strong></p>
+    </header>
+  </div>
+</div>
+
+<div class="wrapper">
+
+ <span class="page-divider">
+  <span class="one"></span>
+  <span class="two"></span>
+</span>
+ 
+
+<section class="post-meta">
+  <div class="post-date">December 8, 2020</div>
+  <div class="post-categories">
+  in 
+    
+    <a href="/category/spring-boot">Spring-boot</a>
+    
+  
+  </div>
+</section>
+
+<article class="post-content">
+  <p><code class="highlighter-rouge">Spring Boot</code>에서는 기본적으로 <a href="http://logback.qos.ch/"><code class="highlighter-rouge">Logback</code></a>를 사용하기 때문에 <code class="highlighter-rouge">Logback</code>의 <code class="highlighter-rouge">Dependency</code>를 제외시키고 <code class="highlighter-rouge">Log4j2</code>를 추가 해야 한다. 자세한 내용은 설정 내용은 <code class="highlighter-rouge">Sprinb Boot</code> <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/howto.html#howto-configure-log4j-for-logging">Reference Doc</a>를 참고한다.</p>
+
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml">...
+<span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-web<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;exclusions&gt;</span>
+        <span class="nt">&lt;exclusion&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-logging<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;/exclusion&gt;</span>
+    <span class="nt">&lt;/exclusions&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+<span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-log4j2<span class="nt">&lt;/artifactId&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+...</code></pre></figure>
+
+<p><code class="highlighter-rouge">Log4j2</code>는 로깅 포멧을 지원하는 파일 형식이 <code class="highlighter-rouge">xml</code>, <code class="highlighter-rouge">yml</code>, <code class="highlighter-rouge">json</code> 등이 있지만 기본적으로 지원하는 파일 형식은 <code class="highlighter-rouge">xml</code>이며 다른 파일 형식일 경우 추가적인 <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/howto.html#howto-configure-log4j-for-logging-yaml-or-json-config"><code class="highlighter-rouge">Dependency</code></a>를 추가 해야 한다.</p>
+
+<hr />
+
+<p><code class="highlighter-rouge">Spring Boot</code>의 기본 <code class="highlighter-rouge">Lof4j2</code>의 설정은 <a href="https://github.com/spring-projects/spring-boot/blob/v2.4.1/spring-boot-project/spring-boot/src/main/resources/org/springframework/boot/logging/log4j2/log4j2.xml">log4j2.xml</a>를 참고 하며 자세한 설정은 <code class="highlighter-rouge">Log4j2</code> <a href="http://logging.apache.org/log4j/2.x/index.html">문서</a>를 참고한다.<br /></p>
+<ul>
+  <li><a href="http://logging.apache.org/log4j/2.x/manual/appenders.html">Appenders</a>
+    <ul>
+      <li><a href="http://logging.apache.org/log4j/2.x/manual/appenders.html#ConsoleAppender">Console Appender</a>, <a href="http://logging.apache.org/log4j/2.x/manual/appenders.html#KafkaAppender">Kafka Appender</a>, <a href="http://logging.apache.org/log4j/2.x/manual/appenders.html#RollingFileAppender">RollingFile Appender</a></li>
+    </ul>
+  </li>
+  <li><a href="http://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout">Pattern Layout</a></li>
+  <li><a href="http://logging.apache.org/log4j/2.x/manual/async.html#MixedSync-Async">Mixing Synchronous and Asynchronous Loggers</a></li>
+</ul>
+
+<hr />
+
+<p>다음은 <code class="highlighter-rouge">Log4j2</code> 테스트를 위한 프로젝트는 <code class="inline text" style="color: blue; font-weight: bold;">startserver</code>서버와 <code class="inline text" style="color: red; font-weight: bold;">logging</code>서버를 준비하였다.<br />
+두 서버 모든 같은 <code class="highlighter-rouge">log4j2.xml</code>를 사용하며 <code class="inline text" style="color: blue; font-weight: bold;">startserver</code>서버는 <code class="inline text" style="color: red; font-weight: bold;">logging</code>서버를 호출 하고 <code class="inline text" style="color: red; font-weight: bold;">logging</code>서버는 <code class="highlighter-rouge">application.yml</code>설정을 통해 환경별로 로깅 레벨을 설정하여 내용을 비교할 것이다.<br />
+추가적으로 <code class="highlighter-rouge">Spring Cloud Sleuth</code>를 통해 로깅에 <code class="highlighter-rouge">traceId</code>와 <code class="highlighter-rouge">spandId</code>를 출력하여 서버간 호출도 확인해 볼 것이다.<br />
+간단한 테스트를 위해 같은 <code class="highlighter-rouge">log4j2.xml</code>을 사용하였지만 <code class="highlighter-rouge">log4j2.xml</code> 또한 환경별로 파일을 분리하여 설정 가능하다.</p>
+
+<ul>
+  <li><code class="highlighter-rouge">log4j2.xml</code> - 공통</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;Configuration</span> <span class="na">status=</span><span class="s">"INFO"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;Properties&gt;</span>
+        <span class="nt">&lt;Property</span> <span class="na">name=</span><span class="s">"layoutPattern"</span><span class="nt">&gt;</span>
+            %highlight{[%-5p]}{FATAL=bg_red, ERROR=red, INFO=green, DEBUG=cyan} %style{%mdc{traceId}}{Red}|%style{%mdc{spanId}}{blue}|%style{%d{yyyy-MM-dd HH:mm:ss:SSS}}{cyan} [%50c{1.}] %style{[%t]}{yellow} - %m%n 
+        <span class="nt">&lt;/Property&gt;</span>
+    <span class="nt">&lt;/Properties&gt;</span>
+    <span class="nt">&lt;Appenders&gt;</span>
+        <span class="nt">&lt;Console</span> <span class="na">name=</span><span class="s">"Console_Appender"</span> <span class="na">target=</span><span class="s">"SYSTEM_OUT"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;PatternLayout</span> <span class="na">disableAnsi=</span><span class="s">"false"</span> <span class="na">pattern=</span><span class="s">"${layoutPattern}"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/Console&gt;</span>
+        <span class="nt">&lt;RollingFile</span> <span class="na">name=</span><span class="s">"File_Appender"</span> <span class="na">fileName=</span><span class="s">"logs\app.log"</span> <span class="na">filePattern=</span><span class="s">"logs\%d{yyyy-MM-dd}_%i.log.zip"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;PatternLayout</span> <span class="na">pattern=</span><span class="s">"${layoutPattern}"</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;Policies&gt;</span>
+                <span class="nt">&lt;SizeBasedTriggeringPolicy</span> <span class="na">size=</span><span class="s">"100MB"</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;TimeBasedTriggeringPolicy</span> <span class="na">interval=</span><span class="s">"1"</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;/Policies&gt;</span>
+            <span class="nt">&lt;DefaultRolloverStrategy</span> <span class="na">max=</span><span class="s">"10"</span> <span class="na">fileIndex=</span><span class="s">"min"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/RollingFile&gt;</span>
+        <span class="nt">&lt;Async</span> <span class="na">name=</span><span class="s">"Async_Console"</span> <span class="na">includeLocation=</span><span class="s">"true"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">"Console_Appender"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/Async&gt;</span>
+        <span class="nt">&lt;Async</span> <span class="na">name=</span><span class="s">"Async_File"</span> <span class="na">includeLocation=</span><span class="s">"true"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">"File_Appender"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/Async&gt;</span>
+    <span class="nt">&lt;/Appenders&gt;</span>
+    <span class="nt">&lt;Loggers&gt;</span>
+        <span class="nt">&lt;Root</span> <span class="na">level=</span><span class="s">"info"</span> <span class="na">additivity=</span><span class="s">"false"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">"Async_Console"</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">"File_Appender"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/Root&gt;</span>
+        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">"org.hibernate.SQL"</span> <span class="na">level=</span><span class="s">"debug"</span> <span class="na">additivity=</span><span class="s">"false"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">"Async_Console"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/Logger&gt;</span>
+        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">"org.hibernate.type"</span> <span class="na">level=</span><span class="s">"trace"</span> <span class="na">additivity=</span><span class="s">"false"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">"Async_Console"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/Logger&gt;</span>
+    <span class="nt">&lt;/Loggers&gt;</span>
+<span class="nt">&lt;/Configuration&gt;</span></code></pre></figure>
+
+<ul>
+  <li><code class="highlighter-rouge">application.yml</code> - <code class="inline text" style="color: red; font-weight: bold;">logging</code>서버</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-yml" data-lang="yml"><span class="na">logging</span><span class="pi">:</span>
+  <span class="na">config</span><span class="pi">:</span> <span class="s">${logging.config}</span>
+  <span class="na">level</span><span class="pi">:</span>
+    <span class="na">root</span><span class="pi">:</span> <span class="s">${logging.level.root}</span>
+    <span class="s">org.hibernate.SQL</span><span class="pi">:</span> <span class="s">${logging.level.org.hibernate.SQL}</span>
+    <span class="s">org.hibernate.type</span><span class="pi">:</span> <span class="s">${logging.level.org.hibernate.type}</span>
+<span class="na">spring</span><span class="pi">:</span>
+  <span class="na">datasource</span><span class="pi">:</span>
+    <span class="na">url</span><span class="pi">:</span> <span class="s">jdbc:h2:mem:testdb</span>
+    <span class="na">username</span><span class="pi">:</span> <span class="s">sa</span>
+    <span class="na">password</span><span class="pi">:</span>
+    <span class="na">driver-class-name</span><span class="pi">:</span> <span class="s">org.h2.Driver</span>
+  <span class="na">jpa</span><span class="pi">:</span>
+    <span class="na">generate-ddl</span><span class="pi">:</span> <span class="no">true</span>
+    <span class="na">hibernate</span><span class="pi">:</span>
+      <span class="na">ddl-auto</span><span class="pi">:</span> <span class="s">create</span></code></pre></figure>
+
+<ul>
+  <li><code class="highlighter-rouge">application-dev.yml</code> - <code class="inline text" style="color: red; font-weight: bold;">logging</code>서버</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-yml" data-lang="yml"><span class="na">logging</span><span class="pi">:</span>
+  <span class="na">config</span><span class="pi">:</span> <span class="s">classpath:log4j2.xml</span>
+  <span class="na">level</span><span class="pi">:</span>
+    <span class="na">root</span><span class="pi">:</span> <span class="s">info</span>
+    <span class="s">org.hibernate.SQL</span><span class="pi">:</span> <span class="s">debug</span> <span class="c1"># debug - SQL 로그 출력</span>
+    <span class="s">org.hibernate.type</span><span class="pi">:</span> <span class="s">trace</span> <span class="c1">#mtrace - binding 변수 출력 </span></code></pre></figure>
+
+<ul>
+  <li><code class="highlighter-rouge">application-prod.yml</code> - <code class="inline text" style="color: red; font-weight: bold;">logging</code>서버</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-yml" data-lang="yml"><span class="na">logging</span><span class="pi">:</span>
+  <span class="na">config</span><span class="pi">:</span> <span class="s">classpath:log4j2.xml</span>
+  <span class="na">level</span><span class="pi">:</span>
+    <span class="na">root</span><span class="pi">:</span> <span class="s">info</span>
+    <span class="s">org.hibernate.SQL</span><span class="pi">:</span> <span class="s">info</span>
+    <span class="s">org.hibernate.type</span><span class="pi">:</span> <span class="s">info</span></code></pre></figure>
+
+<hr />
+
+<p><code class="inline text" style="color: blue; font-weight: bold;">startserver</code>서버에서는 <code class="inline text" style="color: red; font-weight: bold;">logging</code>서버를 호출하기 위해 <code class="highlighter-rouge">RestTemplate</code>를 사용하였으며 <code class="highlighter-rouge">RestTemplate</code>를 <code class="highlighter-rouge">new</code>를 통해서 생성시 <code class="highlighter-rouge">Spring Cloud Sleuth</code>의 <code class="highlighter-rouge">TracingClientHttpRequestInterceptor</code>가 등록되지 못하는 것으로 <a href="https://docs.spring.io/spring-cloud-sleuth/docs/2.2.5.RELEASE/reference/html/#synchronous-rest-template">확인</a>된다.</p>
+<blockquote>
+  <p>You have to register RestTemplate as a bean so that the interceptors get injected. If you create a RestTemplate instance with a new keyword, the instrumentation does NOT work.</p>
+</blockquote>
+
+<ul>
+  <li>TraceRestTemplateBeanPostProcessor</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TraceRestTemplateBeanPostProcessor</span> <span class="kd">implements</span> <span class="nc">BeanPostProcessor</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">BeanFactory</span> <span class="n">beanFactory</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">TraceRestTemplateBeanPostProcessor</span><span class="o">(</span><span class="nc">BeanFactory</span> <span class="n">beanFactory</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">beanFactory</span> <span class="o">=</span> <span class="n">beanFactory</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">Object</span> <span class="nf">postProcessBeforeInitialization</span><span class="o">(</span><span class="nc">Object</span> <span class="n">bean</span><span class="o">,</span> <span class="nc">String</span> <span class="n">beanName</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">BeansException</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">bean</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">Object</span> <span class="nf">postProcessAfterInitialization</span><span class="o">(</span><span class="nc">Object</span> <span class="n">bean</span><span class="o">,</span> <span class="nc">String</span> <span class="n">beanName</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">BeansException</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">bean</span> <span class="k">instanceof</span> <span class="nc">RestTemplate</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">RestTemplate</span> <span class="n">rt</span> <span class="o">=</span> <span class="o">(</span><span class="nc">RestTemplate</span><span class="o">)</span><span class="n">bean</span><span class="o">;</span>
+            <span class="o">(</span><span class="k">new</span> <span class="nc">RestTemplateInterceptorInjector</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">interceptor</span><span class="o">())).</span><span class="na">inject</span><span class="o">(</span><span class="n">rt</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="k">return</span> <span class="n">bean</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="nc">LazyTraceClientHttpRequestInterceptor</span> <span class="nf">interceptor</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">LazyTraceClientHttpRequestInterceptor</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">beanFactory</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<ul>
+  <li>LazyTraceClientHttpRequestInterceptor</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LazyTraceClientHttpRequestInterceptor</span> <span class="kd">implements</span> <span class="nc">ClientHttpRequestInterceptor</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">BeanFactory</span> <span class="n">beanFactory</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">TracingClientHttpRequestInterceptor</span> <span class="n">interceptor</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">LazyTraceClientHttpRequestInterceptor</span><span class="o">(</span><span class="nc">BeanFactory</span> <span class="n">beanFactory</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">beanFactory</span> <span class="o">=</span> <span class="n">beanFactory</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">ClientHttpResponse</span> <span class="nf">intercept</span><span class="o">(</span><span class="nc">HttpRequest</span> <span class="n">request</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">body</span><span class="o">,</span> <span class="nc">ClientHttpRequestExecution</span> <span class="n">execution</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">isContextUnusable</span><span class="o">()</span> <span class="o">?</span> <span class="n">execution</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">body</span><span class="o">)</span> <span class="o">:</span> <span class="k">this</span><span class="o">.</span><span class="na">interceptor</span><span class="o">().</span><span class="na">intercept</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">body</span><span class="o">,</span> <span class="n">execution</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kt">boolean</span> <span class="nf">isContextUnusable</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="nc">ContextUtil</span><span class="o">.</span><span class="na">isContextUnusable</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">beanFactory</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nc">ClientHttpRequestInterceptor</span> <span class="nf">interceptor</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">interceptor</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">this</span><span class="o">.</span><span class="na">interceptor</span> <span class="o">=</span> <span class="o">(</span><span class="nc">TracingClientHttpRequestInterceptor</span><span class="o">)</span><span class="k">this</span><span class="o">.</span><span class="na">beanFactory</span><span class="o">.</span><span class="na">getBean</span><span class="o">(</span><span class="nc">TracingClientHttpRequestInterceptor</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">interceptor</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<ul>
+  <li>TracingClientHttpRequestInterceptor</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">TracingClientHttpRequestInterceptor</span> <span class="kd">implements</span> <span class="nc">ClientHttpRequestInterceptor</span> <span class="o">{</span>
+<span class="o">...</span>
+    <span class="kd">public</span> <span class="nc">ClientHttpResponse</span> <span class="nf">intercept</span><span class="o">(</span><span class="nc">HttpRequest</span> <span class="n">req</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">body</span><span class="o">,</span> <span class="nc">ClientHttpRequestExecution</span> <span class="n">execution</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="nc">TracingClientHttpRequestInterceptor</span><span class="o">.</span><span class="na">HttpRequestWrapper</span> <span class="n">request</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">TracingClientHttpRequestInterceptor</span><span class="o">.</span><span class="na">HttpRequestWrapper</span><span class="o">(</span><span class="n">req</span><span class="o">);</span>
+        <span class="nc">Span</span> <span class="n">span</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">handler</span><span class="o">.</span><span class="na">handleSend</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">log</span><span class="o">.</span><span class="na">isDebugEnabled</span><span class="o">())</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"Wrapping an outbound http call with span ["</span> <span class="o">+</span> <span class="n">span</span> <span class="o">+</span> <span class="s">"]"</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="nc">ClientHttpResponse</span> <span class="n">response</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">Throwable</span> <span class="n">error</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+        <span class="nc">Object</span> <span class="n">var10</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="nc">Scope</span> <span class="n">ws</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">currentTraceContext</span><span class="o">.</span><span class="na">newScope</span><span class="o">(</span><span class="n">span</span><span class="o">.</span><span class="na">context</span><span class="o">());</span>
+            <span class="nc">Throwable</span> <span class="n">var9</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="n">execution</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">req</span><span class="o">,</span> <span class="n">body</span><span class="o">);</span>
+<span class="o">...</span></code></pre></figure>
+
+<hr />
+<ul>
+  <li><code class="inline text" style="color: blue; font-weight: bold;">startserver</code>서버 - Main</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@SpringBootApplication</span><span class="o">(</span><span class="n">scanBasePackages</span> <span class="o">=</span> <span class="o">{</span><span class="s">"brave"</span><span class="o">,</span> <span class="s">"io.github.jr"</span><span class="o">})</span>
+<span class="nd">@RestController</span>
+<span class="nd">@Log4j2</span> <span class="c1">// private static final Logger log = LogManager.getLogger(StartserverApplication.class); 생성</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">StartserverApplication</span> <span class="o">{</span>
+    <span class="nd">@Autowired</span>
+    <span class="nc">RestTemplate</span> <span class="n">restTemplate</span><span class="o">;</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">RestTemplate</span> <span class="nf">getRestTemplate</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">RestTemplate</span><span class="o">();</span>
+    <span class="o">}</span>
+
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">SpringApplication</span><span class="o">.</span><span class="na">run</span><span class="o">(</span><span class="nc">StartserverApplication</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">args</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@GetMapping</span>
+    <span class="kd">public</span> <span class="nc">Object</span> <span class="nf">retrieveByClubName</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">JsonProcessingException</span> <span class="o">{</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"[startserver] start"</span><span class="o">);</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+        <span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"userId"</span><span class="o">,</span> <span class="s">"Hello"</span><span class="o">);</span>
+        <span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"name"</span><span class="o">,</span> <span class="s">"World"</span><span class="o">);</span>
+        <span class="nc">Object</span> <span class="n">object</span> <span class="o">=</span> <span class="n">restTemplate</span><span class="o">.</span><span class="na">postForObject</span><span class="o">(</span><span class="s">"http://localhost:8080/user"</span><span class="o">,</span> <span class="n">map</span><span class="o">,</span> <span class="nc">Object</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"[startserver] end : "</span> <span class="o">+</span> <span class="k">new</span> <span class="nc">ObjectMapper</span><span class="o">().</span><span class="na">writeValueAsString</span><span class="o">(</span><span class="n">object</span><span class="o">));</span>
+        <span class="k">return</span> <span class="n">object</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<hr />
+
+<ul>
+  <li><code class="inline text" style="color: red; font-weight: bold;">logging</code>서버 - Main</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@SpringBootApplication</span><span class="o">(</span><span class="n">scanBasePackages</span> <span class="o">=</span> <span class="o">{</span><span class="s">"brave"</span><span class="o">,</span><span class="s">"io.github.jr"</span><span class="o">})</span>
+<span class="nd">@RestController</span>
+<span class="nd">@Log4j2</span> <span class="c1">// private static final Logger log = LogManager.getLogger(LoggingApplication.class); 생성</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">LoggingApplication</span> <span class="o">{</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">UserRepository</span> <span class="n">userRepository</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">SpringApplication</span><span class="o">.</span><span class="na">run</span><span class="o">(</span><span class="nc">LoggingApplication</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">args</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@PostMapping</span><span class="o">(</span><span class="s">"/user"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">User</span> <span class="nf">insert</span><span class="o">(</span><span class="nd">@RequestBody</span> <span class="nc">User</span> <span class="n">user</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">JsonProcessingException</span> <span class="o">{</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"[logging] start : "</span> <span class="o">+</span> <span class="k">new</span> <span class="nc">ObjectMapper</span><span class="o">().</span><span class="na">writeValueAsString</span><span class="o">(</span><span class="n">user</span><span class="o">));</span>
+        <span class="nc">User</span> <span class="n">user1</span> <span class="o">=</span> <span class="n">userRepository</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">user</span><span class="o">);</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"[logging] end : "</span> <span class="o">+</span> <span class="k">new</span> <span class="nc">ObjectMapper</span><span class="o">().</span><span class="na">writeValueAsString</span><span class="o">(</span><span class="n">user1</span><span class="o">));</span>
+        <span class="k">return</span> <span class="n">user1</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<hr />
+
+<ul>
+  <li><code class="inline text" style="color: blue; font-weight: bold;">startserver</code>서버 
+<a href="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/5/1.PNG" data-lightbox="1" data-title="1">
+<img src="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/5/1.PNG" />
+</a></li>
+  <li>
+    <dl>
+      <dt><code class="inline text" style="color: red; font-weight: bold;">logging</code>서버 - <code class="highlighter-rouge">spring.profiles.active: dev</code></dt>
+      <dd>Hibernate SQL 및 Binding Parameter 출력
+<a href="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/5/2.JPG" data-lightbox="1" data-title="1">
+<img src="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/5/2.JPG" />
+</a></dd>
+    </dl>
+  </li>
+  <li>
+    <dl>
+      <dt><code class="inline text" style="color: red; font-weight: bold;">logging</code>서버 - <code class="highlighter-rouge">spring.profiles.active: prod</code></dt>
+      <dd>Hibernate SQL 및 Binding Parameter 미출력
+<a href="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/5/3.PNG" data-lightbox="1" data-title="1">
+<img src="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/5/3.PNG" />
+</a></dd>
+    </dl>
+  </li>
+</ul>
+
+<hr />
+
+<ul>
+  <li><code class="inline text" style="color: blue; font-weight: bold;">startserver</code>서버 <a href="https://github.com/Jr-Developers/startserver">소스</a></li>
+  <li><code class="inline text" style="color: red; font-weight: bold;">logging</code>서버 <a href="https://github.com/Jr-Developers/logging">소스</a></li>
+</ul>
+
+</article>
+
+
+
+<section class="tags">
+  <strong>Tags:</strong> <a href="/tag/spring-boot">spring-boot</a>,&nbsp;<a href="/tag/log4j2">log4j2</a>,&nbsp;<a href="/tag/spring-cloud-sleuth">spring-cloud-sleuth</a>
+</section>
+
+
+
+<section class="rss">
+  <p class="rss-subscribe text"><strong>Subscribe <a href="/feed.xml">via RSS</a></strong></p>
+</section>
+
+<section class="share">
+  <span>Share: </span>
+  
+    
+    
+      <a href="//twitter.com/share?text=Spring+Boot+Log4j2+%EC%84%A4%EC%A0%95&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot5.html&via=TheBenCentra"
+        onclick="window.open(this.href, 'twitter-share', 'width=550,height=255');return false;">
+        <i class="fa fa-twitter-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+      <a href="//www.facebook.com/sharer.php?t=Spring+Boot+Log4j2+%EC%84%A4%EC%A0%95&u=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot5.html"
+        onclick="window.open(this.href, 'facebook-share', 'width=550,height=255');return false;">
+        <i class="fa fa-facebook-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+      <a href="//www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot5.html"
+        onclick="window.open(this.href, 'linkedin-share', 'width=550,height=255');return false;">
+        <i class="fa fa-linkedin-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+  
+    
+    
+    
+    
+      <a href="//plus.google.com/share?title=Spring+Boot+Log4j2+%EC%84%A4%EC%A0%95&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot5.html"
+        onclick="window.open(this.href, 'google-plus-share', 'width=550,height=255');return false;">
+        <i class="fa fa-google-plus-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+      <a href="//www.pinterest.com/pin/create/button/?description=Spring+Boot+Log4j2+%EC%84%A4%EC%A0%95&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot5.html&media=https://jr-developers.github.io/assets/header_image.jpg"
+        onclick="window.open(this.href, 'pinterest-share', 'width=550,height=255');return false;">
+        <i class="fa fa-pinterest-square fa-lg"></i>
+      </a>
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+      <a href="//www.reddit.com/submit" onclick="window.location = '//www.reddit.com/submit?url=' + encodeURIComponent('https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot5.html') + '&title=Spring Boot Log4j2 설정'; return false">
+        <i class="fa fa-reddit-square fa-lg"></i>
+      </a>
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+</section>
+
+
+
+
+<section class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'jr-developers-github-io';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</section>
+
+
+
+</div>
+</div>
+
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h3 class="footer-heading">주니어 개발자 블로그</h3>
+
+    <div class="site-navigation">
+
+      <p><strong>Site Map</strong></p>
+      <ul class="pages">
+				
+	
+
+	
+
+	
+
+	
+	<li class="nav-link"><a href="/posts/">Posts</a>
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+      </ul>
+    </div>
+
+    <div class="site-contact">
+
+      <p><strong>Contact</strong></p>
+      <ul class="social-media-list">
+        <li>
+          <a href="mailto:jr.developerss@gmail.com">
+            <i class="fa fa-envelope-o"></i>
+            <span class="username">jr.developerss@gmail.com</span>
+          </a>
+        </li>
+
+        
+          
+        
+          
+        
+          
+          <li>
+            <a href="https://github.com/jr-developers" title="Fork me on GitHub">
+              <i class="fa fa-github"></i>
+              <span class="username">jr-developer</span>
+            </a>
+          </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+
+      </ul>
+    </div>
+
+    <div class="site-signature">
+      <p class="rss-subscribe text"><strong>Subscribe <a href="/feed.xml">via RSS</a></strong></p>
+      <p class="text">A simple yet classy theme for your Jekyll website or blog.
+</p>
+    </div>
+
+  </div>
+
+</footer>
+
+<!-- Scripts -->
+<script src="//code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.1/js/lightbox.min.js"></script>
+<script src="//unpkg.com/popper.js@1"></script>
+<script src="//unpkg.com/tippy.js@5"></script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+  // Default syntax highlighting
+  hljs.initHighlightingOnLoad();
+
+  // Header
+  var menuToggle = $('#js-mobile-menu').unbind();
+  $('#js-navigation-menu').removeClass("show");
+  menuToggle.on('click', function(e) {
+    e.preventDefault();
+    $('#js-navigation-menu').slideToggle(function(){
+      if($('#js-navigation-menu').is(':hidden')) {
+        $('#js-navigation-menu').removeAttr('style');
+      }
+    });
+  });
+
+	// Enable tooltips via Tippy.js
+	if (Array.isArray(window.tooltips)) {
+		window.tooltips.forEach(function(tooltip) {
+			var selector = tooltip[0];
+			var config = tooltip[1];
+			tippy(selector, config);
+		})
+	}
+});
+
+</script>
+
+
+
+
+
+
+  </body>
+
+</html>

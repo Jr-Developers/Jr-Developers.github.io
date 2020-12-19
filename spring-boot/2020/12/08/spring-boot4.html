@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Hibernate Event Listener를 이용한 항목 입력 및 로깅</title>
+  <meta name="description" content="DB 등록/수정 시 반복적으로 발생하는 로깅이나 Audit 항목의 입력을 Hibernate Event Listener를 이용하여 해결가능하다.하지만 아래와 같은 제약 사항이 존재하므로 참고한다.  In general, the lifecycle method of a portable ...">
+  
+  <meta name="author" content="주니어 개발자">
+  <meta name="copyright" content="&copy; 주니어 개발자 2020">
+  
+
+  <!-- External libraries -->
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.4.1/styles/monokai-sublime.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/lightbox2/2.7.1/css/lightbox.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <!-- Favicon and other icons (made with http://www.favicon-generator.org/) -->
+  <link rel="shortcut icon" href="/assets/icons/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/assets/icons/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/icons/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/assets/icons/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/assets/icons/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/assets/icons/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/assets/icons/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/assets/icons/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/assets/icons/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/assets/icons/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="/assets/icons/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/icons/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+  <link rel="manifest" href="/assets/icons/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/assets/icons/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+
+  
+  <!-- Facebook OGP cards -->
+  <meta property="og:description" content="DB 등록/수정 시 반복적으로 발생하는 로깅이나 Audit 항목의 입력을 Hibernate Event Listener를 이용하여 해결가능하다.하지만 아래와 같은 제약 사항이 존재하므로 참고한다.  In general, the lifecycle method of a portable ..." />
+  <meta property="og:url" content="https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot4.html">
+  <meta property="og:site_name" content="주니어 개발자 블로그" />
+  <meta property="og:title" content="Hibernate Event Listener를 이용한 항목 입력 및 로깅" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://jr-developers.github.io/assets/logo.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="612" />
+  <meta property="og:image:height" content="605" />
+  
+
+  
+  <!-- Twitter: card tags -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Hibernate Event Listener를 이용한 항목 입력 및 로깅">
+  <meta name="twitter:description" content="DB 등록/수정 시 반복적으로 발생하는 로깅이나 Audit 항목의 입력을 Hibernate Event Listener를 이용하여 해결가능하다.하지만 아래와 같은 제약 사항이 존재하므로 참고한다.  In general, the lifecycle method of a portable ...">
+  <meta name="twitter:image" content="https://jr-developers.github.io/assets/logo.png">
+  <meta name="twitter:url" content="https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot4.html">
+  
+
+  
+
+  <!-- Site styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot4.html">
+	<link rel="alternate" type="application/rss+xml" title="주니어 개발자 블로그" href="https://jr-developers.github.io/feed.xml" />
+
+	<meta name="google-site-verification" content="Taa5vT48o67ok6s5-GcjwD8baYRy1FzqTZQ2-Hz_zkY" />
+	<meta name="naver-site-verification" content="204e8bb103ce5af87be25e251bccda5461d74bbc" />
+
+	<!-- Tooltips -->
+	<script type="text/javascript">
+		window.tooltips = []
+		$(document).ready(function() {
+			$('code.inline').each(function(i, block) {
+				hljs.highlightBlock(block);
+			});
+			$('code[data-lang]').each(function(i, block) {
+				hljs.highlightBlock(block);
+			});
+		});
+	</script>
+</head>
+
+
+  <body>
+
+    <header class="navigation" role="banner">
+  <div class="navigation-wrapper">
+    <a href="/" class="logo">
+      
+      <img src="/assets/logo.png" alt="주니어 개발자 블로그">
+      
+    </a>
+    <a href="javascript:void(0)" class="navigation-menu-button" id="js-mobile-menu">
+      <i class="fa fa-bars"></i>
+    </a>
+    <nav role="navigation">
+      <ul id="js-navigation-menu" class="navigation-menu show">
+				
+	
+
+	
+
+	
+
+	
+	<li class="nav-link"><a href="/posts/">Posts</a>
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+      </ul>
+    </nav>
+  </div>
+</header>
+
+
+    <div class="page-content">
+        <div class="post">
+
+<div class="post-header-container " >
+  <div class="scrim ">
+    <header class="post-header">
+      <h1 class="title">Hibernate Event Listener를 이용한 항목 입력 및 로깅</h1>
+      <p class="info">by <strong>주니어 개발자</strong></p>
+    </header>
+  </div>
+</div>
+
+<div class="wrapper">
+
+ <span class="page-divider">
+  <span class="one"></span>
+  <span class="two"></span>
+</span>
+ 
+
+<section class="post-meta">
+  <div class="post-date">December 8, 2020</div>
+  <div class="post-categories">
+  in 
+    
+    <a href="/category/spring-boot">Spring-boot</a>
+    
+  
+  </div>
+</section>
+
+<article class="post-content">
+  <p>DB 등록/수정 시 반복적으로 발생하는 로깅이나 Audit 항목의 입력을 <code class="highlighter-rouge">Hibernate Event Listener</code>를 이용하여 해결가능하다.
+하지만 아래와 같은 제약 사항이 존재하므로 참고한다.</p>
+<blockquote>
+  <p>In general, the lifecycle method of a portable application should not invoke EntityManager or Query operations, access other entity instances, or modify relationships within the same persistence context. A lifecycle callback method may modify the non-relationship state of the entity on which it is invoked.</p>
+</blockquote>
+
+<p><code class="highlighter-rouge">Hibernate Event Listener</code>가 지원 하는 <code class="highlighter-rouge">Callback Annotation</code>은 7종으로 자세한 내용과 사용방법은 <code class="highlighter-rouge">Hibernate</code><a href="https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#events-jpa-callbacks">Reference Doc</a>에 기술되어 있다.</p>
+
+<p>추가적으로 <code class="highlighter-rouge">JPA</code>의 <code class="highlighter-rouge">UPDATE</code> 경우 <code class="highlighter-rouge">Dirty Check</code>를 통해 변경된 항목이 있을 경우에만 <code class="highlighter-rouge">UPDATE</code>를 수행하므로 변경 사항이 없는 경우 <code class="inline">@PreUpdate</code>, <code class="inline">@PostUpdate</code>가 수행 되지 않는다.</p>
+
+<p>또한 <code class="inline">@PreUpdate</code>, <code class="inline">@PostUpdate</code>는 <code class="highlighter-rouge">Flush</code> 시점 이전, 이후에 수행되므로 <code class="inline">@Transactional</code>과 로직의 구현에 따라 <code class="highlighter-rouge">save</code> 메소드 호출 이후에도 <code class="highlighter-rouge">Flush</code>가 발생 하지 않는 경우가 존재하여 항목들의 값이 입력되기 이전의 객체일 수 있다.</p>
+
+<hr />
+
+<p>우선 첫 번째 방법으로 <code class="highlighter-rouge">JPA Entity</code> 내부에 <code class="highlighter-rouge">JPA Event Listener Annotation</code>를 정의하여 구현하는 방법이다.</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Setter</span>
+<span class="nd">@Getter</span>
+<span class="nd">@MappedSuperclass</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Audit</span> <span class="o">{</span>
+    <span class="nd">@Id</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"ID"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">id</span><span class="o">;</span>
+
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"INSERT_TIMESTAMP"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">Timestamp</span> <span class="n">insertTimestamp</span><span class="o">;</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"INSERT_HTTP_METHOD"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">insertHTTPMethod</span><span class="o">;</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"INSERT_URL"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">insertUrl</span><span class="o">;</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"INSERT_METHOD"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">insertMethod</span><span class="o">;</span>
+
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"UPDATE_TIMESTAMP"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">Timestamp</span> <span class="n">updateTimestamp</span><span class="o">;</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"UPDATE_HTTP_METHOD"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">updateHTTPMethod</span><span class="o">;</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"UPDATE_URL"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">updateUrl</span><span class="o">;</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"UPDATE_METHOD"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">updateMethod</span><span class="o">;</span>
+
+    <span class="nd">@PrePersist</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPersist</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">HttpServletRequest</span> <span class="n">req</span> <span class="o">=</span> <span class="o">((</span><span class="nc">ServletRequestAttributes</span><span class="o">)</span> <span class="nc">RequestContextHolder</span><span class="o">.</span><span class="na">getRequestAttributes</span><span class="o">()).</span><span class="na">getRequest</span><span class="o">();</span>
+        <span class="nc">HandlerMethod</span> <span class="n">handlerMethod</span> <span class="o">=</span> <span class="o">(</span><span class="nc">HandlerMethod</span><span class="o">)</span> <span class="n">req</span><span class="o">.</span><span class="na">getAttribute</span><span class="o">(</span><span class="nc">HandlerMapping</span><span class="o">.</span><span class="na">BEST_MATCHING_HANDLER_ATTRIBUTE</span><span class="o">);</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="no">UUID</span><span class="o">.</span><span class="na">randomUUID</span><span class="o">().</span><span class="na">toString</span><span class="o">();</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">insertTimestamp</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Timestamp</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">());</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">insertHTTPMethod</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="na">getMethod</span><span class="o">();</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">insertUrl</span> <span class="o">=</span> <span class="o">(</span><span class="nc">String</span><span class="o">)</span> <span class="n">req</span><span class="o">.</span><span class="na">getAttribute</span><span class="o">(</span><span class="nc">HandlerMapping</span><span class="o">.</span><span class="na">BEST_MATCHING_PATTERN_ATTRIBUTE</span><span class="o">);</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">insertMethod</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">TargetLengthBasedClassNameAbbreviator</span><span class="o">(</span><span class="mi">10</span><span class="o">).</span><span class="na">abbreviate</span><span class="o">(</span><span class="n">handlerMethod</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+    <span class="o">}</span>
+
+    <span class="nd">@PreUpdate</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onUpdate</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">HttpServletRequest</span> <span class="n">req</span> <span class="o">=</span> <span class="o">((</span><span class="nc">ServletRequestAttributes</span><span class="o">)</span> <span class="nc">RequestContextHolder</span><span class="o">.</span><span class="na">getRequestAttributes</span><span class="o">()).</span><span class="na">getRequest</span><span class="o">();</span>
+        <span class="nc">HandlerMethod</span> <span class="n">handlerMethod</span> <span class="o">=</span> <span class="o">(</span><span class="nc">HandlerMethod</span><span class="o">)</span> <span class="n">req</span><span class="o">.</span><span class="na">getAttribute</span><span class="o">(</span><span class="nc">HandlerMapping</span><span class="o">.</span><span class="na">BEST_MATCHING_HANDLER_ATTRIBUTE</span><span class="o">);</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">updateTimestamp</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Timestamp</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">());</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">updateHTTPMethod</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="na">getMethod</span><span class="o">();</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">updateUrl</span> <span class="o">=</span> <span class="o">(</span><span class="nc">String</span><span class="o">)</span> <span class="n">req</span><span class="o">.</span><span class="na">getAttribute</span><span class="o">(</span><span class="nc">HandlerMapping</span><span class="o">.</span><span class="na">BEST_MATCHING_PATTERN_ATTRIBUTE</span><span class="o">);</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">updateMethod</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">TargetLengthBasedClassNameAbbreviator</span><span class="o">(</span><span class="mi">10</span><span class="o">).</span><span class="na">abbreviate</span><span class="o">(</span><span class="n">handlerMethod</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Table</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"USER"</span><span class="o">)</span>
+<span class="nd">@Entity</span>
+<span class="nd">@Setter</span>
+<span class="nd">@Getter</span>
+<span class="nd">@NoArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">User</span> <span class="kd">extends</span> <span class="nc">Audit</span> <span class="o">{</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"USER_ID"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">userId</span><span class="o">;</span>
+
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"NAME"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+<span class="o">}</span></code></pre></figure>
+
+<ul>
+  <li>INSERT 확인 결과</li>
+</ul>
+<p align="center" width="100%">
+<a href="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/4/1.PNG" data-lightbox="1" data-title="1">
+  <img src="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/4/1.PNG" />
+</a>
+</p>
+<ul>
+  <li>UPDATE 확인 결과</li>
+</ul>
+<p align="center" width="100%">
+<a href="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/4/2.PNG" data-lightbox="1" data-title="1">
+  <img src="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/4/2.PNG" />
+</a>
+</p>
+
+<hr />
+
+<p>두 번째 방법은 <code class="highlighter-rouge">JPA Entity Class</code>에 <code class="inline">@EntityListeners</code>에 <code class="highlighter-rouge">JPA Event Listener Annotation</code>를 정의하여 구현한 <code class="highlighter-rouge">Class</code>들을 나열하는 방법이다.</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Setter</span>
+<span class="nd">@Getter</span>
+<span class="nd">@NoArgsConstructor</span>
+<span class="nd">@MappedSuperclass</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Audit</span> <span class="o">{</span>
+    <span class="nd">@Id</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"ID"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">id</span><span class="o">;</span>
+
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"INSERT_TIMESTAMP"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">Timestamp</span> <span class="n">insertTimestamp</span><span class="o">;</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"INSERT_HTTP_METHOD"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">insertHTTPMethod</span><span class="o">;</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"INSERT_URL"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">insertUrl</span><span class="o">;</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"INSERT_METHOD"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">insertMethod</span><span class="o">;</span>
+
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"UPDATE_TIMESTAMP"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">Timestamp</span> <span class="n">updateTimestamp</span><span class="o">;</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"UPDATE_HTTP_METHOD"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">updateHTTPMethod</span><span class="o">;</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"UPDATE_URL"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">updateUrl</span><span class="o">;</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"UPDATE_METHOD"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">updateMethod</span><span class="o">;</span>
+<span class="o">}</span></code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Table</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"USER"</span><span class="o">)</span>
+<span class="nd">@Entity</span>
+<span class="nd">@Setter</span>
+<span class="nd">@Getter</span>
+<span class="nd">@NoArgsConstructor</span>
+<span class="nd">@EntityListeners</span><span class="o">({</span><span class="nc">PrePersistEventListener</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="nc">PreUpdateEventListener</span><span class="o">.</span><span class="na">class</span><span class="o">})</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">User</span> <span class="kd">extends</span> <span class="nc">Audit</span> <span class="o">{</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"USER_ID"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">userId</span><span class="o">;</span>
+
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"NAME"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+<span class="o">}</span></code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PrePersistEventListener</span> <span class="o">{</span>
+    <span class="nd">@PrePersist</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPersist</span><span class="o">(</span><span class="nc">Audit</span> <span class="n">audit</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">HttpServletRequest</span> <span class="n">req</span> <span class="o">=</span> <span class="o">((</span><span class="nc">ServletRequestAttributes</span><span class="o">)</span> <span class="nc">RequestContextHolder</span><span class="o">.</span><span class="na">getRequestAttributes</span><span class="o">()).</span><span class="na">getRequest</span><span class="o">();</span>
+        <span class="nc">HandlerMethod</span> <span class="n">handlerMethod</span> <span class="o">=</span> <span class="o">(</span><span class="nc">HandlerMethod</span><span class="o">)</span> <span class="n">req</span><span class="o">.</span><span class="na">getAttribute</span><span class="o">(</span><span class="nc">HandlerMapping</span><span class="o">.</span><span class="na">BEST_MATCHING_HANDLER_ATTRIBUTE</span><span class="o">);</span>
+        <span class="n">audit</span><span class="o">.</span><span class="na">setId</span><span class="o">(</span><span class="no">UUID</span><span class="o">.</span><span class="na">randomUUID</span><span class="o">().</span><span class="na">toString</span><span class="o">());</span>
+        <span class="n">audit</span><span class="o">.</span><span class="na">setInsertTimestamp</span><span class="o">(</span><span class="k">new</span> <span class="nc">Timestamp</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()));</span>
+        <span class="n">audit</span><span class="o">.</span><span class="na">setInsertHTTPMethod</span><span class="o">(</span><span class="n">req</span><span class="o">.</span><span class="na">getMethod</span><span class="o">());</span>
+        <span class="n">audit</span><span class="o">.</span><span class="na">setInsertUrl</span><span class="o">((</span><span class="nc">String</span><span class="o">)</span> <span class="n">req</span><span class="o">.</span><span class="na">getAttribute</span><span class="o">(</span><span class="nc">HandlerMapping</span><span class="o">.</span><span class="na">BEST_MATCHING_PATTERN_ATTRIBUTE</span><span class="o">));</span>
+        <span class="n">audit</span><span class="o">.</span><span class="na">setInsertMethod</span><span class="o">(</span><span class="k">new</span> <span class="nc">TargetLengthBasedClassNameAbbreviator</span><span class="o">(</span><span class="mi">10</span><span class="o">).</span><span class="na">abbreviate</span><span class="o">(</span><span class="n">handlerMethod</span><span class="o">.</span><span class="na">toString</span><span class="o">()));</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PreUpdateEventListener</span> <span class="o">{</span>
+    <span class="nd">@PreUpdate</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPersist</span><span class="o">(</span><span class="nc">Audit</span> <span class="n">audit</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">HttpServletRequest</span> <span class="n">req</span> <span class="o">=</span> <span class="o">((</span><span class="nc">ServletRequestAttributes</span><span class="o">)</span> <span class="nc">RequestContextHolder</span><span class="o">.</span><span class="na">getRequestAttributes</span><span class="o">()).</span><span class="na">getRequest</span><span class="o">();</span>
+        <span class="nc">HandlerMethod</span> <span class="n">handlerMethod</span> <span class="o">=</span> <span class="o">(</span><span class="nc">HandlerMethod</span><span class="o">)</span> <span class="n">req</span><span class="o">.</span><span class="na">getAttribute</span><span class="o">(</span><span class="nc">HandlerMapping</span><span class="o">.</span><span class="na">BEST_MATCHING_HANDLER_ATTRIBUTE</span><span class="o">);</span>
+        <span class="n">audit</span><span class="o">.</span><span class="na">setUpdateTimestamp</span><span class="o">(</span><span class="k">new</span> <span class="nc">Timestamp</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()));</span>
+        <span class="n">audit</span><span class="o">.</span><span class="na">setUpdateHTTPMethod</span><span class="o">(</span><span class="n">req</span><span class="o">.</span><span class="na">getMethod</span><span class="o">());</span>
+        <span class="n">audit</span><span class="o">.</span><span class="na">setUpdateUrl</span><span class="o">((</span><span class="nc">String</span><span class="o">)</span> <span class="n">req</span><span class="o">.</span><span class="na">getAttribute</span><span class="o">(</span><span class="nc">HandlerMapping</span><span class="o">.</span><span class="na">BEST_MATCHING_PATTERN_ATTRIBUTE</span><span class="o">));</span>
+        <span class="n">audit</span><span class="o">.</span><span class="na">setUpdateMethod</span><span class="o">(</span><span class="k">new</span> <span class="nc">TargetLengthBasedClassNameAbbreviator</span><span class="o">(</span><span class="mi">10</span><span class="o">).</span><span class="na">abbreviate</span><span class="o">(</span><span class="n">handlerMethod</span><span class="o">.</span><span class="na">toString</span><span class="o">()));</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<ul>
+  <li>INSERT 확인 결과</li>
+</ul>
+<p align="center" width="100%">
+<a href="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/4/3.PNG" data-lightbox="1" data-title="1">
+  <img src="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/4/3.PNG" />
+</a>
+</p>
+<ul>
+  <li>UPDATE 확인 결과</li>
+</ul>
+<p align="center" width="100%">
+<a href="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/4/4.PNG" data-lightbox="1" data-title="1">
+  <img src="https://raw.githubusercontent.com/Jr-Developers/Jr-Developers.github.io/master/assets/post/spring-boot/4/4.PNG" />
+</a>
+</p>
+<ul>
+  <li>Event Listener <a href="https://github.com/Jr-Developers/eventlistener">소스</a></li>
+</ul>
+
+</article>
+
+
+
+<section class="tags">
+  <strong>Tags:</strong> <a href="/tag/spring-boot">spring-boot</a>,&nbsp;<a href="/tag/spring-data-jpa">spring-data-jpa</a>,&nbsp;<a href="/tag/datasource">datasource</a>,&nbsp;<a href="/tag/jpa">jpa</a>,&nbsp;<a href="/tag/hibernate">hibernate</a>
+</section>
+
+
+
+<section class="rss">
+  <p class="rss-subscribe text"><strong>Subscribe <a href="/feed.xml">via RSS</a></strong></p>
+</section>
+
+<section class="share">
+  <span>Share: </span>
+  
+    
+    
+      <a href="//twitter.com/share?text=Hibernate+Event+Listener%EB%A5%BC+%EC%9D%B4%EC%9A%A9%ED%95%9C+%ED%95%AD%EB%AA%A9+%EC%9E%85%EB%A0%A5+%EB%B0%8F+%EB%A1%9C%EA%B9%85&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot4.html&via=TheBenCentra"
+        onclick="window.open(this.href, 'twitter-share', 'width=550,height=255');return false;">
+        <i class="fa fa-twitter-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+      <a href="//www.facebook.com/sharer.php?t=Hibernate+Event+Listener%EB%A5%BC+%EC%9D%B4%EC%9A%A9%ED%95%9C+%ED%95%AD%EB%AA%A9+%EC%9E%85%EB%A0%A5+%EB%B0%8F+%EB%A1%9C%EA%B9%85&u=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot4.html"
+        onclick="window.open(this.href, 'facebook-share', 'width=550,height=255');return false;">
+        <i class="fa fa-facebook-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+      <a href="//www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot4.html"
+        onclick="window.open(this.href, 'linkedin-share', 'width=550,height=255');return false;">
+        <i class="fa fa-linkedin-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+  
+    
+    
+    
+    
+      <a href="//plus.google.com/share?title=Hibernate+Event+Listener%EB%A5%BC+%EC%9D%B4%EC%9A%A9%ED%95%9C+%ED%95%AD%EB%AA%A9+%EC%9E%85%EB%A0%A5+%EB%B0%8F+%EB%A1%9C%EA%B9%85&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot4.html"
+        onclick="window.open(this.href, 'google-plus-share', 'width=550,height=255');return false;">
+        <i class="fa fa-google-plus-square fa-lg"></i>
+      </a>
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+      <a href="//www.pinterest.com/pin/create/button/?description=Hibernate+Event+Listener%EB%A5%BC+%EC%9D%B4%EC%9A%A9%ED%95%9C+%ED%95%AD%EB%AA%A9+%EC%9E%85%EB%A0%A5+%EB%B0%8F+%EB%A1%9C%EA%B9%85&url=https%3A%2F%2Fjr-developers.github.io%2Fspring-boot%2F2020%2F12%2F08%2Fspring-boot4.html&media=https://jr-developers.github.io/assets/header_image.jpg"
+        onclick="window.open(this.href, 'pinterest-share', 'width=550,height=255');return false;">
+        <i class="fa fa-pinterest-square fa-lg"></i>
+      </a>
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+      <a href="//www.reddit.com/submit" onclick="window.location = '//www.reddit.com/submit?url=' + encodeURIComponent('https://jr-developers.github.io/spring-boot/2020/12/08/spring-boot4.html') + '&title=Hibernate Event Listener를 이용한 항목 입력 및 로깅'; return false">
+        <i class="fa fa-reddit-square fa-lg"></i>
+      </a>
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+  
+</section>
+
+
+
+
+<section class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'jr-developers-github-io';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</section>
+
+
+
+</div>
+</div>
+
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h3 class="footer-heading">주니어 개발자 블로그</h3>
+
+    <div class="site-navigation">
+
+      <p><strong>Site Map</strong></p>
+      <ul class="pages">
+				
+	
+
+	
+
+	
+
+	
+	<li class="nav-link"><a href="/posts/">Posts</a>
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+      </ul>
+    </div>
+
+    <div class="site-contact">
+
+      <p><strong>Contact</strong></p>
+      <ul class="social-media-list">
+        <li>
+          <a href="mailto:jr.developerss@gmail.com">
+            <i class="fa fa-envelope-o"></i>
+            <span class="username">jr.developerss@gmail.com</span>
+          </a>
+        </li>
+
+        
+          
+        
+          
+        
+          
+          <li>
+            <a href="https://github.com/jr-developers" title="Fork me on GitHub">
+              <i class="fa fa-github"></i>
+              <span class="username">jr-developer</span>
+            </a>
+          </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+
+      </ul>
+    </div>
+
+    <div class="site-signature">
+      <p class="rss-subscribe text"><strong>Subscribe <a href="/feed.xml">via RSS</a></strong></p>
+      <p class="text">A simple yet classy theme for your Jekyll website or blog.
+</p>
+    </div>
+
+  </div>
+
+</footer>
+
+<!-- Scripts -->
+<script src="//code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.1/js/lightbox.min.js"></script>
+<script src="//unpkg.com/popper.js@1"></script>
+<script src="//unpkg.com/tippy.js@5"></script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+  // Default syntax highlighting
+  hljs.initHighlightingOnLoad();
+
+  // Header
+  var menuToggle = $('#js-mobile-menu').unbind();
+  $('#js-navigation-menu').removeClass("show");
+  menuToggle.on('click', function(e) {
+    e.preventDefault();
+    $('#js-navigation-menu').slideToggle(function(){
+      if($('#js-navigation-menu').is(':hidden')) {
+        $('#js-navigation-menu').removeAttr('style');
+      }
+    });
+  });
+
+	// Enable tooltips via Tippy.js
+	if (Array.isArray(window.tooltips)) {
+		window.tooltips.forEach(function(tooltip) {
+			var selector = tooltip[0];
+			var config = tooltip[1];
+			tippy(selector, config);
+		})
+	}
+});
+
+</script>
+
+
+
+
+
+
+  </body>
+
+</html>
